@@ -45,3 +45,5 @@ vcpkg-configuration.json
 out
 .vs
 .vshistory
+
+!src/**/*.obj
