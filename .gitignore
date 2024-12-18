@@ -35,3 +35,13 @@
 glad/
 glm/
 build/
+
+# Build and setup config
+CMakeLists.txt
+CMakePresets.json
+vcpkg.**
+vcpkg_installed
+vcpkg-configuration.json
+out
+.vs
+.vshistory
