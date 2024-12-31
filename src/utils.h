@@ -61,7 +61,7 @@ static void CreateVertexBufferTriangle(GLuint &VBO, GLuint &EBO, int &v_number, 
 static void AddShader(GLuint ShaderProgram, const char *pShaderText, GLenum ShaderType){
     GLuint ShaderObj = glCreateShader(ShaderType);
 
-    if(ShaderObj == 0){
+    if (ShaderObj == 0){
         fprintf(stderr, "Error creating shader type %d\n", ShaderType);
         exit(0);
     }
@@ -75,7 +75,7 @@ static void AddShader(GLuint ShaderProgram, const char *pShaderText, GLenum Shad
     glCompileShader(ShaderObj);
     GLint success;
     glGetShaderiv(ShaderObj, GL_COMPILE_STATUS, &success);
-    if(!success){
+    if (!success){
         GLchar InfoLog[1024];
         glGetShaderInfoLog(ShaderObj, 1024, NULL, InfoLog);
         fprintf(stderr, "Error compiling shader type %d: '%s'\n", ShaderType, InfoLog);
@@ -88,7 +88,7 @@ static void AddShader(GLuint ShaderProgram, const char *pShaderText, GLenum Shad
 static GLuint CompileShaders(const char *pVSFileName, const char *pFSFileName){
     GLuint ShaderProgram = glCreateProgram();
 
-    if(ShaderProgram == 0){
+    if (ShaderProgram == 0){
         fprintf(stderr, "Error creating shader program\n");
         exit(1);
     }
@@ -96,7 +96,7 @@ static GLuint CompileShaders(const char *pVSFileName, const char *pFSFileName){
     char *shv, *shf;
     shv = readTextFile(pVSFileName);
 
-    if(shv == NULL){
+    if (shv == NULL){
         fprintf(stderr, "Error load shader file!\n");
         exit(1);
     };
@@ -118,7 +118,7 @@ static GLuint CompileShaders(const char *pVSFileName, const char *pFSFileName){
     glLinkProgram(ShaderProgram);
 
     glGetProgramiv(ShaderProgram, GL_LINK_STATUS, &Success);
-    if(Success == 0){
+    if (Success == 0){
         glGetProgramInfoLog(ShaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
         fprintf(stderr, "Error linking shader program: '%s'\n", ErrorLog);
         exit(1);
@@ -126,7 +126,7 @@ static GLuint CompileShaders(const char *pVSFileName, const char *pFSFileName){
 
     glValidateProgram(ShaderProgram);
     glGetProgramiv(ShaderProgram, GL_VALIDATE_STATUS, &Success);
-    if(!Success){
+    if (!Success){
         glGetProgramInfoLog(ShaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
         fprintf(stderr, "Invalid shader program: '%s'\n", ErrorLog);
         exit(1);
@@ -134,4 +134,5 @@ static GLuint CompileShaders(const char *pVSFileName, const char *pFSFileName){
 
     return ShaderProgram;
 }
+
 #endif

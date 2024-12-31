@@ -85,7 +85,7 @@ int main(void){
     glEnable(GL_DEPTH_TEST);
     Scene my_scene;
 
-    my_scene.SetWireframe(true);
+    // my_scene.SetWireframe(true);
     glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     my_scene.LookAt(0.0, 0.0, 40.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
