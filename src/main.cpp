@@ -72,9 +72,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
-        //
     }
-        
 }
 
 int main(void){
@@ -105,43 +103,42 @@ int main(void){
     Scene my_scene;
 
     vector<Object*> airplane;
-    airplane.push_back(read_obj_file("../models/Body.obj"));
-    airplane[0]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
 
-    airplane.push_back(read_obj_file("../models/Elevator.obj"));
-    airplane[1]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+    airplane.push_back(read_obj_file("models/osprey/Body.obj"));
+    airplane[0]->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp",122,256,256);
 
-    airplane.push_back(read_obj_file("../models/Left_Aileron.obj"));
-    airplane[2]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+    airplane.push_back(read_obj_file("models/osprey/Elevator.obj"));
+    airplane[1]->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp",122,256,256);
 
-    airplane.push_back(read_obj_file("../models/Left_Engine.obj"));
-    airplane[3]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+    airplane.push_back(read_obj_file("models/osprey/Left_Aileron.obj"));
+    airplane[2]->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp",122,256,256);
 
-    airplane.push_back(read_obj_file("../models/Left_Fan.obj"));
-    airplane[4]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+    airplane.push_back(read_obj_file("models/osprey/Left_Engine.obj"));
+    airplane[3]->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp",122,256,256);
 
-    airplane.push_back(read_obj_file("../models/Left_Flap.obj"));
-    airplane[5]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+    airplane.push_back(read_obj_file("models/osprey/Left_Fan.obj"));
+    airplane[4]->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp",122,256,256);
 
-    airplane.push_back(read_obj_file("../models/Left_Rudder.obj"));
-    airplane[6]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+    airplane.push_back(read_obj_file("models/osprey/Left_Flap.obj"));
+    airplane[5]->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp",122,256,256);
 
-    airplane.push_back(read_obj_file("../models/Right_Aileron.obj"));
-    airplane[7]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+    airplane.push_back(read_obj_file("models/osprey/Left_Rudder.obj"));
+    airplane[6]->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp",122,256,256);
 
-    airplane.push_back(read_obj_file("../models/Right_Engine.obj"));
-    airplane[8]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+    airplane.push_back(read_obj_file("models/osprey/Right_Aileron.obj"));
+    airplane[7]->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp",122,256,256);
 
-    airplane.push_back(read_obj_file("../models/Right_Fan.obj"));
-    airplane[9]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+    airplane.push_back(read_obj_file("models/osprey/Right_Engine.obj"));
+    airplane[8]->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp",122,256,256);
 
-    airplane.push_back(read_obj_file("../models/Right_Flap.obj"));
-    airplane[10]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+    airplane.push_back(read_obj_file("models/osprey/Right_Fan.obj"));
+    airplane[9]->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp",122,256,256);
 
-    airplane.push_back(read_obj_file("../models/Right_Rudder.obj"));
-    airplane[11]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+    airplane.push_back(read_obj_file("models/osprey/Right_Flap.obj"));
+    airplane[10]->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp",122,256,256);
 
-
+    airplane.push_back(read_obj_file("models/osprey/Right_Rudder.obj"));
+    airplane[11]->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp",122,256,256);
 
 
     my_scene.push_back_objects(airplane);

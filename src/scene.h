@@ -5,7 +5,7 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <stdio.h>
-#include <string.h>
+#include <string>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -64,8 +64,8 @@ Scene::~Scene(){
 }
 
 Scene::Scene(){
-    const char *pVSFileName = "../src/shader.vs";
-    const char *pFSFileName = "../src/shader.fs";
+    const char *pVSFileName = "shaders/shader.vs";
+    const char *pFSFileName = "shaders/shader.fs";
     mShaderProgram = CompileShaders(pVSFileName, pFSFileName);
     mProjectionMatrix = glm::mat4(1.0);
     mView = glm::mat4(1.0);

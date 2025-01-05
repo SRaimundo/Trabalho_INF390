@@ -110,7 +110,7 @@ void Object::LoadTexture2DSimpleBmp(const char *name,int header_size,int Width,i
 }
 
 void Object::Render(GLint position,GLint normal,GLint texcoord){
-    if (no_normal or mIsNoTexture){
+    if (no_normal || mIsNoTexture){
         glBindBuffer(GL_ARRAY_BUFFER, mVBO);
         glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 0, 0);
 

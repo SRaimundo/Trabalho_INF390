@@ -8,6 +8,7 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include "utils.h"
 using namespace std;
 #include <glm/glm.hpp>
@@ -36,50 +37,51 @@ Texture::Texture(GLenum TextureTarget, const std::string& FileName){
     mFileName      = FileName;
 }
 
-bool Texture::LoadSimpleBmp(int header_size,int Width,int Height,int BGR){
-   GLubyte tex[Height][Width][3];
-   try{
-        ifstream arq(mFileName,ios::binary);
+bool Texture::LoadSimpleBmp(int header_size, int Width, int Height, int BGR) {
+    vector<GLubyte> tex(Height * Width * 3);
+
+    try {
+        ifstream arq(mFileName, ios::binary);
         char c;
-        if(!arq){
+        if (!arq) {
             cout << "Error ao abrir" << mFileName;
             exit(1);
         }
         int i = 0;
-        for(int i = 0; i < header_size ; i++)
+        for (int i = 0; i < header_size; i++)
             c = arq.get();
-        for(int i = 0; i < Height ; i++)
-            for(int j = 0; j < Width ; j++){
-                if(!(BGR)){
+        for (int i = 0; i < Height; i++)
+            for (int j = 0; j < Width; j++) {
+                if (!(BGR)) {
                     c = arq.get();
-                    tex[i][j][2] = c;
-                    c =  arq.get();
-                    tex[i][j][1] = c ;
-                    c =  arq.get();
-                    tex[i][j][0] = c;
-                }else{
+                    tex[i * Width * 3 + j * 3 + 2] = c;
                     c = arq.get();
-                    tex[i][j][0] = c;
-                    c =  arq.get();
-                    tex[i][j][1] = c ;
-                    c =  arq.get();
-                    tex[i][j][2] = c;
+                    tex[i * Width * 3 + j * 3 + 1] = c;
+                    c = arq.get();
+                    tex[i * Width * 3 + j * 3 + 0] = c;
+                }
+                else {
+                    c = arq.get();
+                    tex[i * Width * 3 + j * 3 + 0] = c;
+                    c = arq.get();
+                    tex[i * Width * 3 + j * 3 + 1] = c;
+                    c = arq.get();
+                    tex[i * Width * 3 + j * 3 + 2] = c;
                 }
             }
 
         arq.close();
         arq.clear();
     }
-    catch(...){
+    catch (...) {
         cout << "Erro ao ler imagem" << endl;
         return false;
     }
-   
-   
+
     mImageWidth = Width;
     mImageHeight = Height;
     mImageBPP = 3;
-    LoadInternal((void*)tex);
+    LoadInternal((void*)tex.data());
     return true;
 }
 
