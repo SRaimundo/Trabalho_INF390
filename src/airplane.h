@@ -1,5 +1,5 @@
-#ifndef PLANE_H__
-#define PLANE_H__
+#ifndef AIRPLANE_H__
+#define AIRPLANE_H__
 
 #include <glad/glad.h>
 #define GLFW_INCLUDE_NONE
@@ -13,9 +13,9 @@
 using namespace std;
 using namespace glm;
 
-class Plane {
+class Airplane {
 public:
-	Plane();
+    Airplane();
 	void Update();
 	void SetPosition(vec3 position);
 	void SetEulerAngles(vec3 eulerAngles);
@@ -48,23 +48,23 @@ private:
 	Object* mRightFan;
 };
 
-void Plane::Update() {
+void Airplane::Update() {
 
 }
 
-void Plane::SetPosition(vec3 position) {
+void Airplane::SetPosition(vec3 position) {
 
 }
 
-void Plane::SetEulerAngles(vec3 eulerAngles) {
+void Airplane::SetEulerAngles(vec3 eulerAngles) {
 
 }
 
-void Plane::Move(vec3 movement) {
+void Airplane::Move(vec3 movement) {
 
 }
 
-Plane::Plane() {
+Airplane::Airplane() {
     mBody = read_obj_file("models/osprey/Body.obj");
     mBody->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", 122, 256, 256);
 
@@ -115,7 +115,7 @@ Plane::Plane() {
     mObjects.push_back(mRightRudder);
 }
 
-vector<Object*> Plane::GetObjects() {
+vector<Object*> Airplane::GetObjects() {
     return mObjects;
 }
 

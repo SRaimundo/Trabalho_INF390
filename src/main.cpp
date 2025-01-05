@@ -11,7 +11,7 @@
 #include "scene.h"
 #include "object.h"
 #include "loadobject.h"
-#include "plane.h"
+#include "airplane.h"
 
 using namespace std;
  
@@ -103,7 +103,7 @@ int main(void){
     glEnable(GL_DEPTH_TEST);
     Scene my_scene;
 
-    Plane plane; 
+    Airplane plane;
 
     my_scene.push_back_objects(plane.GetObjects());
 
