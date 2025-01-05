@@ -17,6 +17,9 @@ using namespace std;
 bool ortho_per = true;
 GLint SCREEN_WIDTH = 800,SCREEN_HEIGHT = 800; 
 
+int worldx=0, worldy=180, worldz=0;
+float camerax=0.0,cameray=0.0,cameraz=5.0;
+
 static void error_callback(int error, const char* description){
     fprintf(stderr, "Error: %s\n", description);
 }
@@ -30,17 +33,33 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
        ortho_per = false;
     if(action == GLFW_PRESS){
         switch (key){
+        case GLFW_KEY_Q:
+            if(mods == GLFW_MOD_SHIFT){
+                worldx = (worldx + 5)%360;
+            }else{
+                worldx = (worldx - 5)%360;
+            }
+            break;
         case GLFW_KEY_W:
-
+            if(mods == GLFW_MOD_SHIFT){
+                worldy = (worldy + 5)%360;
+            }else{
+                worldy = (worldy - 5)%360;
+            }
+            break;
+        case GLFW_KEY_E:
+            if(mods == GLFW_MOD_SHIFT){
+                worldz = (worldz + 5)%360;
+            }else{
+                worldz = (worldz - 5)%360;
+            }
             break;
         case GLFW_KEY_A:
-
-            break;
-        case GLFW_KEY_S:
-
-            break;
-        case GLFW_KEY_D:
-
+            if(mods == GLFW_MOD_SHIFT){
+                cameraz = cameraz + 0.1;
+            }else{
+                cameraz = cameraz - 0.1;
+            }
             break;
         default:
             break;
@@ -85,10 +104,52 @@ int main(void){
     glEnable(GL_DEPTH_TEST);
     Scene my_scene;
 
+    vector<Object*> airplane;
+    airplane.push_back(read_obj_file("../models/Body.obj"));
+    airplane[0]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+
+    airplane.push_back(read_obj_file("../models/Elevator.obj"));
+    airplane[1]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+
+    airplane.push_back(read_obj_file("../models/Left_Aileron.obj"));
+    airplane[2]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+
+    airplane.push_back(read_obj_file("../models/Left_Engine.obj"));
+    airplane[3]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+
+    airplane.push_back(read_obj_file("../models/Left_Fan.obj"));
+    airplane[4]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+
+    airplane.push_back(read_obj_file("../models/Left_Flap.obj"));
+    airplane[5]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+
+    airplane.push_back(read_obj_file("../models/Left_Rudder.obj"));
+    airplane[6]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+
+    airplane.push_back(read_obj_file("../models/Right_Aileron.obj"));
+    airplane[7]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+
+    airplane.push_back(read_obj_file("../models/Right_Engine.obj"));
+    airplane[8]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+
+    airplane.push_back(read_obj_file("../models/Right_Fan.obj"));
+    airplane[9]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+
+    airplane.push_back(read_obj_file("../models/Right_Flap.obj"));
+    airplane[10]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+
+    airplane.push_back(read_obj_file("../models/Right_Rudder.obj"));
+    airplane[11]->LoadTexture2DSimpleBmp("../models/TexturaMetal.bmp",122,256,256);
+
+
+
+
+    my_scene.push_back_objects(airplane);
+
     // my_scene.SetWireframe(true);
     glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-    my_scene.LookAt(0.0, 0.0, 40.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    my_scene.LookAt(40.0, 0.0, 40.0, 0.0, 0.0, 0.0, 0.0, 10.0, 0.0);
 
 
     while (!glfwWindowShouldClose(window)){
@@ -98,6 +159,10 @@ int main(void){
         }else{
             my_scene.Ortho3D(-2.0, 2.0, -2.0, 2.0, 0.0, 200.0);
         }
+
+        // glm::mat4 matrix_now = glm::rotate(glm::rotate(glm::rotate(glm::mat4(1.0),glm::radians((float)worldx),glm::vec3(1.0,0.0,0.0)),glm::radians((float)worldy),glm::vec3(0.0,1.0,0.0)),glm::radians((float)worldz),glm::vec3(0.0,0.0,1.0));
+        // airplane[0]->Model(matrix_now);
+        my_scene.Render();
 
 
         glfwSwapBuffers(window);
