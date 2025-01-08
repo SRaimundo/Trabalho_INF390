@@ -18,6 +18,19 @@ using namespace std;
 #include "scene.h"
 #include <map>
 
+vector<float> CalcCenter(const vector<GLfloat> &data, int verticesNumber){
+    vector<float> center(3,0.0f);
+
+    if(data.size()<8) return center;
+
+    for(int i=0;i<data.size();i+=8){
+        for(int j=0;j<3;j++){
+            center[j] += data[i+j]/ verticesNumber;
+        }
+    }
+    return center;
+}
+
 Object *read_obj_file(string filename){
     std::ifstream file(filename);
     if(!file){
@@ -103,8 +116,24 @@ Object *read_obj_file(string filename){
             }
         }
         my_obj = new Object(my_data.size()/8,index_final.size(),my_data.data(),index_final.data());
+
+        auto center = CalcCenter(my_data,my_data.size()/8);
+        my_obj->SetPivot(center[0],center[1],center[2]);
     }
     return my_obj;
+}
+
+void ReadPivot(Object* obj, const string filename){
+    ifstream file(filename);
+    if(file.is_open()){
+        float x,y,z;
+        file>>x>>y>>z;
+        obj->SetPivot(x,y,z);
+        file.close();
+    }else{
+        std::cerr << "Error opening file: " << filename << std::endl;
+        throw std::ios_base::failure("Error opening file: " + filename);
+    }
 }
 
 #endif

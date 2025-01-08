@@ -31,6 +31,11 @@ public:
     void LoadTexture2DSimpleBmp(const char *name,int header_size,int Width,int Height,int BGR=0);
     friend class Scene;
 
+    void SetPivot(float x, float y, float z);
+    float GetPivotX() const;
+    float GetPivotY() const;
+    float GetPivotZ() const;
+
 private:
     void Render(GLint position,GLint normal,GLint texcoord);
     bool mIsIndexed;
@@ -39,6 +44,7 @@ private:
     float mColor[3];
     float mShininess;
     float mStrength;
+    float mPivot[3];
 
     glm::mat4 mModelMatrix;
     GLuint mVBO;
@@ -68,6 +74,7 @@ Object::Object(int verticesNumber,int indexNumber, GLfloat *Vertices_information
     mShininess = 50.0;
     mStrength = 1.0;
     mModelMatrix = glm::mat4(1.0);
+    mPivot[0] = mPivot[1] = mPivot[2] = 0;
 }
 
 Object::~Object(){
@@ -81,6 +88,23 @@ void Object::SetColor(float r, float g, float b){
     mColor[1] = g;
     mColor[2] = b;
     return;
+}
+
+void Object::SetPivot(float x, float y, float z){
+    mPivot[0] = x;
+    mPivot[1] = y;
+    mPivot[2] = z;
+}
+
+float Object::GetPivotX() const{
+    return mPivot[0];
+}
+
+float Object::GetPivotY() const{
+    return mPivot[1];
+}
+float Object::GetPivotZ() const{
+    return mPivot[2];
 }
 
 void Object::Model(glm::mat4 model_matrix){

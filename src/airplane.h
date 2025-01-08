@@ -8,7 +8,7 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
-#include <object.h>
+#include "object.h"
 
 using namespace std;
 using namespace glm;
