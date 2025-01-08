@@ -18,7 +18,7 @@ using namespace std;
 bool ortho_per = true;
 GLint SCREEN_WIDTH = 800,SCREEN_HEIGHT = 800; 
 
-int worldx=0, worldy=180, worldz=0;
+int worldx=0, worldy=60, worldz=0;
 float camerax=0.0,cameray=0.0,cameraz=5.0;
 
 static void error_callback(int error, const char* description){

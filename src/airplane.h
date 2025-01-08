@@ -65,41 +65,46 @@ void Airplane::Move(vec3 movement) {
 }
 
 Airplane::Airplane() {
+    // wip
+    int x = 122;
+    int y = 256;
+    int z = 256;
+
     mBody = read_obj_file("models/osprey/Body.obj");
-    mBody->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", 122, 256, 256);
+    mBody->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
 
     mElevator = read_obj_file("models/osprey/Elevator.obj");
-    mElevator->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", 122, 256, 256);
+    mElevator->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
 
     mLeftAileron = read_obj_file("models/osprey/Left_Aileron.obj");
-    mLeftAileron->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", 122, 256, 256);
+    mLeftAileron->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
 
     mLeftEngine = read_obj_file("models/osprey/Left_Engine.obj");
-    mLeftEngine->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", 122, 256, 256);
+    mLeftEngine->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
 
     mLeftFan = read_obj_file("models/osprey/Left_Fan.obj");
-    mLeftFan->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", 122, 256, 256);
+    mLeftFan->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
 
     mLeftFlap = read_obj_file("models/osprey/Left_Flap.obj");
-    mLeftFlap->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", 122, 256, 256);
+    mLeftFlap->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
 
     mLeftRudder = read_obj_file("models/osprey/Left_Rudder.obj");
-    mLeftRudder->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", 122, 256, 256);
+    mLeftRudder->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
 
     mRightAileron = read_obj_file("models/osprey/Right_Aileron.obj");
-    mRightAileron->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", 122, 256, 256);
+    mRightAileron->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
 
     mRightEngine = read_obj_file("models/osprey/Right_Engine.obj");
-    mRightEngine->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", 122, 256, 256);
+    mRightEngine->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
 
     mRightFan = read_obj_file("models/osprey/Right_Fan.obj");
-    mRightFan->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", 122, 256, 256);
+    mRightFan->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
 
     mRightFlap = read_obj_file("models/osprey/Right_Flap.obj");
-    mRightFlap->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", 122, 256, 256);
+    mRightFlap->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
 
     mRightRudder = read_obj_file("models/osprey/Right_Rudder.obj");
-    mRightRudder->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", 122, 256, 256);
+    mRightRudder->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
 
     mObjects.push_back(mBody);
     mObjects.push_back(mElevator);
