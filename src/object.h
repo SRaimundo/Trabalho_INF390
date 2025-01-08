@@ -29,12 +29,15 @@ public:
     glm::mat4 GetModelMatrix();
     void SetWireframe(bool on_wireframe) { mIsWireframe = on_wireframe; };
     void LoadTexture2DSimpleBmp(const char *name,int header_size,int Width,int Height,int BGR=0);
+    void AddDependence(Object* obj);
     friend class Scene;
 
     void SetPivot(float x, float y, float z);
     float GetPivotX() const;
     float GetPivotY() const;
     float GetPivotZ() const;
+
+    void PropagateModel(const glm::mat4 matrixModel);
 
 private:
     void Render(GLint position,GLint normal,GLint texcoord);
@@ -54,6 +57,10 @@ private:
 
     bool mIsNoTexture;
     Texture *mTextures;
+
+    //Dependencies for facilitating transformations
+    //it's not great, but in this case, it's ok
+    vector<Object*> mDependeces;
 };
 
 Object::Object(int verticesNumber,int indexNumber, GLfloat *Vertices_information,GLushort *index):mVerticesNumber(verticesNumber),mIndexNumber(indexNumber){
@@ -122,6 +129,17 @@ void Object::push_left_matrix(glm::mat4 matrix){
 
 glm::mat4 Object::GetModelMatrix(){
     return mModelMatrix;
+}
+
+void Object::AddDependence(Object* obj){
+    mDependeces.push_back(obj);
+}
+
+void Object::PropagateModel(glm::mat4 matrixModel){
+    Model(matrixModel);
+    for(Object* obj: mDependeces){
+        obj->PropagateModel(matrixModel);
+    }
 }
 
 void Object::LoadTexture2DSimpleBmp(const char *name,int header_size,int Width,int Height,int BGR){
