@@ -67,6 +67,7 @@ void Airplane::Move(vec3 movement) {
 Airplane::Airplane() {
     mBody = read_obj_file("models/osprey/Body.obj");
     mBody->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", 122, 256, 256);
+    // ReadPivot(mBody,"models/teste.txt"); // read pivot example
 
     mElevator = read_obj_file("models/osprey/Elevator.obj");
     mElevator->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", 122, 256, 256);

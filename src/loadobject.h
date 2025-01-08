@@ -123,4 +123,17 @@ Object *read_obj_file(string filename){
     return my_obj;
 }
 
+void ReadPivot(Object* obj, const string filename){
+    ifstream file(filename);
+    if(file.is_open()){
+        float x,y,z;
+        file>>x>>y>>z;
+        obj->SetPivot(x,y,z);
+        file.close();
+    }else{
+        std::cerr << "Error opening file: " << filename << std::endl;
+        throw std::ios_base::failure("Error opening file: " + filename);
+    }
+}
+
 #endif
