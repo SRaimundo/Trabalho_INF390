@@ -45,8 +45,8 @@ public:
                 float upx, float upy, float upz);
     void Model(glm::mat4 model_matrix);
     void SetLight(int light_number, LightProperties my_light);
-    void push_back_object(Object *new_object);
-    void push_back_objects(vector<Object *> new_objects);
+    void PushBackObject(Object *new_object);
+    void PushBackObjects(vector<Object *> new_objects);
 
 private:
     GLuint mShaderProgram;
@@ -89,7 +89,7 @@ Scene::Scene(){
     mLights[0].quadraticAttenuation = 0.0;
 }
 
-void Scene::push_back_object(Object *new_object){
+void Scene::PushBackObject(Object *new_object){
     mObjects.push_back(new_object);
 }
 
@@ -180,7 +180,7 @@ void Scene::Ortho3D(float WL, float WR, float WB, float WT, float zNear, float z
 
 void Scene::Model(glm::mat4 model_matrix){
     for(auto it = mObjects.begin(); it != mObjects.end(); ++it){
-        (**it).push_left_matrix(model_matrix);
+        (**it).PushLeftMatrix(model_matrix);
     }
     return;
 }
@@ -195,7 +195,7 @@ void Scene::Perspective(float fovy, float aspect, float zNear, float zFar){
     mProjectionMatrix = glm::perspective(fovy, aspect, zNear, zFar);
 }
 
-void Scene::push_back_objects(vector<Object *> new_objects){
+void Scene::PushBackObjects(vector<Object *> new_objects){
     for(auto it = new_objects.begin(); it != new_objects.end(); ++it){
         mObjects.push_back(*it);
     }

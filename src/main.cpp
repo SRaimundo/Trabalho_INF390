@@ -105,13 +105,15 @@ int main(void){
 
     Airplane plane;
 
-    my_scene.push_back_objects(plane.GetObjects());
+    my_scene.PushBackObjects(plane.GetObjects());
 
     // my_scene.SetWireframe(true);
     glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     my_scene.LookAt(40.0, 0.0, 40.0, 0.0, 0.0, 0.0, 0.0, 10.0, 0.0);
 
+
+    float z = 0;
 
     while (!glfwWindowShouldClose(window)){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -121,6 +123,8 @@ int main(void){
             my_scene.Ortho3D(-2.0, 2.0, -2.0, 2.0, 0.0, 200.0);
         }
 
+        plane.SetEulerAngles(vec3(0.0, 0.0, z));
+        z += fmod(0.1, 360.0);
         // glm::mat4 matrix_now = glm::rotate(glm::rotate(glm::rotate(glm::mat4(1.0),glm::radians((float)worldx),glm::vec3(1.0,0.0,0.0)),glm::radians((float)worldy),glm::vec3(0.0,1.0,0.0)),glm::radians((float)worldz),glm::vec3(0.0,0.0,1.0));
         // airplane[0]->Model(matrix_now);
         my_scene.Render();

@@ -5,51 +5,80 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <stdio.h>
-#include <string.h>
+#include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include "texture.h"
 #include "utils.h"
-using namespace std;
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+
+using namespace std;
+using namespace glm; 
 
 class Scene;
 class Object{
 public:
     friend class Scene;
+    
     Object(int verticesNumber,int indexNumber, GLfloat *Vertices_information,GLushort *index);
     ~Object();
+    
     void SetColor(float r, float g, float b);
     void SetShininess(float shininess) { mShininess = shininess; };
     void SetStrength(float strength) { mStrength = strength; };
-    void Model(glm::mat4 model_matrix);
-    void push_right_matrix(glm::mat4 matrix);
-    void push_left_matrix(glm::mat4 matrix);
-    glm::mat4 GetModelMatrix();
+    
+    void SetPosition(vec3 position);
+    void SetEulerAngles(vec3 eulerAngles);
+    void SetScale(vec3 scale);
+    
+    vec3 GetPosition() { return mPosition; }
+    vec3 GetEulerAngles() { return mEulerAngles; };
+
+    mat4 GetModelMatrix();
+    
+    void PushRightMatrix(mat4 matrix);
+    void PushLeftMatrix(mat4 matrix);
+    
     void SetWireframe(bool on_wireframe) { mIsWireframe = on_wireframe; };
     void LoadTexture2DSimpleBmp(const char *name,int header_size,int Width,int Height,int BGR=0);
-    void AddDependence(Object* obj);
-    friend class Scene;
+    
+    void AddDependency(Object* obj);
+    void AddDependencies(vector<Object*> objects);
 
     void SetPivot(float x, float y, float z);
     float GetPivotX() const;
     float GetPivotY() const;
     float GetPivotZ() const;
 
-    void PropagateModel(const glm::mat4 matrixModel);
+    void SetPivot(vec3 pivot);
+    vec3 GetPivot() const;
+
+    void SetInheritedModel(mat4 matrixModel);
 
 private:
     void Render(GLint position,GLint normal,GLint texcoord);
+
+    void Model(mat4 modelMatrix);
+    void EvalModelMatrix();
+
     bool mIsIndexed;
     bool mIsWireframe;
-    bool no_normal;
+    bool mNoNormal;
     float mColor[3];
     float mShininess;
     float mStrength;
     float mPivot[3];
 
-    glm::mat4 mModelMatrix;
+    vec3 mPosition;
+    vec3 mEulerAngles;
+    vec3 mScale;
+    bool isModelMatrixDirty;
+
+    mat4 mModelMatrix;
+    mat4 mInheritedModelMatrix;
+
     GLuint mVBO;
     GLuint mEBO;
     int mVerticesNumber;
@@ -60,13 +89,13 @@ private:
 
     //Dependencies for facilitating transformations
     //it's not great, but in this case, it's ok
-    vector<Object*> mDependeces;
+    vector<Object*> mDependencies;
 };
 
 Object::Object(int verticesNumber,int indexNumber, GLfloat *Vertices_information,GLushort *index):mVerticesNumber(verticesNumber),mIndexNumber(indexNumber){
     mIsIndexed = true;
     mIsWireframe = false;
-    no_normal = false;
+    mNoNormal = false;
     mIsNoTexture = false;
     glGenBuffers(1, &mVBO);
     glBindBuffer(GL_ARRAY_BUFFER, mVBO);
@@ -80,7 +109,14 @@ Object::Object(int verticesNumber,int indexNumber, GLfloat *Vertices_information
     mColor[1] = mColor[2] = 0.0;
     mShininess = 50.0;
     mStrength = 1.0;
-    mModelMatrix = glm::mat4(1.0);
+    mModelMatrix = mat4(1.0);
+    mInheritedModelMatrix = mat4(1.0);
+
+    isModelMatrixDirty = false;
+    mPosition = vec3(0.0);
+    mEulerAngles = vec3(0.0);
+    mScale = vec3(1.0);
+
     mPivot[0] = mPivot[1] = mPivot[2] = 0;
 }
 
@@ -88,6 +124,21 @@ Object::~Object(){
     glDeleteBuffers(1, &mVBO);
     if (mIsIndexed)
         glDeleteBuffers(1, &mEBO);
+}
+
+void Object::SetPosition(vec3 position) { 
+    mPosition = position; 
+    isModelMatrixDirty = true;
+}
+
+void Object::SetEulerAngles(vec3 eulerAngles) { 
+    mEulerAngles = eulerAngles; 
+    isModelMatrixDirty = true;
+}
+
+void Object::SetScale(vec3 scale) { 
+    mScale = scale; 
+    isModelMatrixDirty = true;
 }
 
 void Object::SetColor(float r, float g, float b){
@@ -103,6 +154,12 @@ void Object::SetPivot(float x, float y, float z){
     mPivot[2] = z;
 }
 
+void Object::SetPivot(vec3 pivot) {
+    mPivot[0] = pivot.x;
+    mPivot[1] = pivot.y;
+    mPivot[2] = pivot.z;
+}
+
 float Object::GetPivotX() const{
     return mPivot[0];
 }
@@ -114,45 +171,91 @@ float Object::GetPivotZ() const{
     return mPivot[2];
 }
 
-void Object::Model(glm::mat4 model_matrix){
-    mModelMatrix = model_matrix;
-    return;
+vec3 Object::GetPivot() const{
+    return vec3(mPivot[0], mPivot[1], mPivot[2]);
 }
 
-void Object::push_right_matrix(glm::mat4 matrix){
-    mModelMatrix = mModelMatrix * matrix;
-}
-
-void Object::push_left_matrix(glm::mat4 matrix){
-    mModelMatrix = matrix * mModelMatrix;
-}
-
-glm::mat4 Object::GetModelMatrix(){
-    return mModelMatrix;
-}
-
-void Object::AddDependence(Object* obj){
-    mDependeces.push_back(obj);
-}
-
-void Object::PropagateModel(glm::mat4 matrixModel){
-    Model(matrixModel);
-    for(Object* obj: mDependeces){
-        obj->PropagateModel(matrixModel);
+/// Prefer using SetPosition, SetRotation and SetEulerAngles to work with the model outside the class
+void Object::Model(mat4 modelMatrix){
+    mModelMatrix = modelMatrix;
+    for (Object* obj : mDependencies) {
+        obj->SetInheritedModel(modelMatrix);
     }
 }
 
-void Object::LoadTexture2DSimpleBmp(const char *name,int header_size,int Width,int Height,int BGR){
+void Object::EvalModelMatrix() {
+    mat4 objScale = scale(mat4(1.0), vec3(mScale));
+    mat4 objPosition = translate(mat4(1.0), vec3(mPosition));
+    
+    mat4 objRotation = mat4(1.0);
+    objRotation = rotate(objRotation, radians(mEulerAngles.x), vec3(1.0f, 0.0f, 0.0f));
+    objRotation = rotate(objRotation, radians(mEulerAngles.y), vec3(0.0f, 1.0f, 0.0f)); 
+    objRotation = rotate(objRotation, radians(mEulerAngles.z), vec3(0.0f, 0.0f, 1.0f)); 
+
+    mat4 objTransform = mInheritedModelMatrix * objPosition * objRotation;
+    Model(objTransform * objScale);
+}
+
+void Object::SetInheritedModel(mat4 modelMatrix) {
+    mInheritedModelMatrix = modelMatrix;
+    isModelMatrixDirty = true;
+    for (Object* obj : mDependencies) {
+        obj->SetInheritedModel(mInheritedModelMatrix * mModelMatrix);
+    }
+}
+
+void Object::PushRightMatrix(mat4 matrix){
+    mModelMatrix = mModelMatrix * matrix;
+}
+
+void Object::PushLeftMatrix(mat4 matrix){
+    mModelMatrix = matrix * mModelMatrix;
+}
+
+mat4 Object::GetModelMatrix() {
+    return mModelMatrix;
+}
+
+void Object::AddDependency(Object* obj){
+    mDependencies.push_back(obj);
+}
+
+void Object::AddDependencies(vector<Object*> objects) {
+    for (auto obj : objects) {
+        AddDependency(obj);
+    }
+}
+
+void Object::LoadTexture2DSimpleBmp(const char *name,int headerSize,int width,int height,int BGR){
     if(mIsNoTexture){
         cout << "Object without uv " << endl;
         exit(1);
     }
     mTextures = new Texture(GL_TEXTURE_2D,name);
-    mTextures->LoadSimpleBmp(header_size,Width,Height,BGR);
+    mTextures->LoadSimpleBmp(headerSize,width,height,BGR);
+}
+
+
+// wip, will delete
+string vec3Str(vec3 v) {
+    // look at this mess to interpolate a string. this fucking language man
+    stringstream ss;
+    ss << "(" << v.x << ", " << v.y << ", " << v.z << ")";
+    return ss.str();
 }
 
 void Object::Render(GLint position,GLint normal,GLint texcoord){
-    if (no_normal || mIsNoTexture){
+    //printf("pos: %s rot: %s scale: %s \n", 
+    //    vec3Str(mPosition).c_str(), 
+    //    vec3Str(mEulerAngles).c_str(), 
+    //    vec3Str(mScale).c_str());
+    
+    if (isModelMatrixDirty) {
+        EvalModelMatrix();
+        isModelMatrixDirty = false;
+    }
+
+    if (mNoNormal || mIsNoTexture){
         glBindBuffer(GL_ARRAY_BUFFER, mVBO);
         glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 0, 0);
 

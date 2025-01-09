@@ -17,15 +17,17 @@ class Airplane {
 public:
     Airplane();
 	void Update();
-	void SetPosition(vec3 position);
-	void SetEulerAngles(vec3 eulerAngles);
+    
+    void SetPosition(vec3 position);
+    void SetEulerAngles(vec3 eulerAngles);
+
+    vec3 GetPosition() { return mBody->GetPosition(); }
+    vec3 GetEulerAngles() { return mBody->GetEulerAngles(); };
+
 	void Move(vec3 movement);
     vector<Object*> GetObjects();
 private:
 	float mSpeed;
-	
-	vec3 mPosition;
-	vec3 mEulerAngles;
 
     vector<Object*> mObjects;
 
@@ -53,11 +55,11 @@ void Airplane::Update() {
 }
 
 void Airplane::SetPosition(vec3 position) {
-
+    mBody->SetPosition(position);
 }
 
 void Airplane::SetEulerAngles(vec3 eulerAngles) {
-
+    mBody->SetEulerAngles(eulerAngles);
 }
 
 void Airplane::Move(vec3 movement) {
@@ -66,9 +68,9 @@ void Airplane::Move(vec3 movement) {
 
 Airplane::Airplane() {
     // wip
-    int x = 122;
-    int y = 256;
-    int z = 256;
+    int x = 100;
+    int y = 400;
+    int z = 400;
 
     mBody = read_obj_file("models/osprey/Body.obj");
     mBody->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
@@ -118,6 +120,24 @@ Airplane::Airplane() {
     mObjects.push_back(mRightFan);
     mObjects.push_back(mRightFlap);
     mObjects.push_back(mRightRudder);
+
+    mBody->AddDependencies(vector<Object*> { 
+        mLeftAileron, 
+        mLeftFlap, 
+        mRightAileron, 
+        mRightFlap, 
+        mLeftEngine, 
+        mRightEngine,
+        mLeftEngine, 
+        mRightEngine,
+        mElevator, 
+        mLeftRudder,
+        mRightRudder
+    });
+
+    mRightEngine->AddDependency(mRightFan);
+    mLeftEngine->AddDependency(mLeftFan);
+
 }
 
 vector<Object*> Airplane::GetObjects() {
