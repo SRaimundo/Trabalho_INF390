@@ -19,6 +19,8 @@ bool ortho_per = true;
 GLint SCREEN_WIDTH = 800,SCREEN_HEIGHT = 800; 
 
 int worldx=0, worldy=60, worldz=0;
+glm::vec3 camera(40.0f,0.0f,40.0f);
+glm::vec3 initCamera(40.0f,0.0f,40.0f);
 float camerax=0.0,cameray=0.0,cameraz=5.0;
 
 static void error_callback(int error, const char* description){
@@ -131,6 +133,16 @@ int main(void){
         xPos += 0.1;
         // glm::mat4 matrix_now = glm::rotate(glm::rotate(glm::rotate(glm::mat4(1.0),glm::radians((float)worldx),glm::vec3(1.0,0.0,0.0)),glm::radians((float)worldy),glm::vec3(0.0,1.0,0.0)),glm::radians((float)worldz),glm::vec3(0.0,0.0,1.0));
         // airplane[0]->Model(matrix_now);
+
+        glm::vec3 viewPoint = glm::vec3(plane.GetModelMatrix()*glm::vec4(0.0f,0.0f,0.0f,1.0f));
+
+        glm::vec3 nextCameraView = glm::vec3(plane.GetModelMatrix() * glm::vec4(initCamera,1.0f));
+
+        nextCameraView = camera*0.99f + nextCameraView*0.01f;
+        camera = nextCameraView;
+
+        my_scene.LookAt(camera[0],camera[1],camera[2],viewPoint[0],viewPoint[1],viewPoint[2],0.0f,1.0f,0.0f);
+
         my_scene.Render();
 
 

@@ -24,6 +24,8 @@ public:
     vec3 GetPosition() { return mBody->GetPosition(); }
     vec3 GetEulerAngles() { return mBody->GetEulerAngles(); };
 
+    glm::mat4 GetModelMatrix() const;
+
 	void Move(vec3 movement);
     vector<Object*> GetObjects();
 private:
@@ -64,6 +66,10 @@ void Airplane::SetEulerAngles(vec3 eulerAngles) {
 
 void Airplane::Move(vec3 movement) {
 
+}
+
+glm::mat4 Airplane::GetModelMatrix() const{
+    return mBody->GetModelMatrix();
 }
 
 Airplane::Airplane() {
