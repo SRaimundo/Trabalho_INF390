@@ -115,9 +115,6 @@ int main(void){
     my_scene.LookAt(40.0, 0.0, 40.0, 0.0, 0.0, 0.0, 0.0, 10.0, 0.0);
 
 
-    float z = 0;
-    float xPos = 0;
-
     while (!glfwWindowShouldClose(window)){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         if (ortho_per) {
@@ -126,13 +123,7 @@ int main(void){
             my_scene.Ortho3D(-2.0, 2.0, -2.0, 2.0, 0.0, 200.0);
         }
 
-        plane.SetEulerAngles(vec3(0.0, 0.0, z));
-        plane.SetPosition(vec3(xPos, 0, 0));
-
-        z += fmod(0.1, 360.0);
-        xPos += 0.1;
-        // glm::mat4 matrix_now = glm::rotate(glm::rotate(glm::rotate(glm::mat4(1.0),glm::radians((float)worldx),glm::vec3(1.0,0.0,0.0)),glm::radians((float)worldy),glm::vec3(0.0,1.0,0.0)),glm::radians((float)worldz),glm::vec3(0.0,0.0,1.0));
-        // airplane[0]->Model(matrix_now);
+        plane.Update();
 
         glm::vec3 viewPoint = glm::vec3(plane.GetModelMatrix()*glm::vec4(0.0f,0.0f,0.0f,1.0f));
 

@@ -8,7 +8,6 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include "texture.h"
 #include "utils.h"
 #include <glm/glm.hpp>
@@ -48,11 +47,8 @@ public:
     void AddDependencies(vector<Object*> objects);
 
     void SetPivot(float x, float y, float z);
-    float GetPivotX() const;
-    float GetPivotY() const;
-    float GetPivotZ() const;
-
     void SetPivot(vec3 pivot);
+
     vec3 GetPivot() const;
 
     void SetInheritedModel(mat4 matrixModel);
@@ -69,8 +65,8 @@ private:
     float mColor[3];
     float mShininess;
     float mStrength;
-    float mPivot[3];
-
+    
+    vec3 mPivot;
     vec3 mPosition;
     vec3 mEulerAngles;
     vec3 mScale;
@@ -149,30 +145,15 @@ void Object::SetColor(float r, float g, float b){
 }
 
 void Object::SetPivot(float x, float y, float z){
-    mPivot[0] = x;
-    mPivot[1] = y;
-    mPivot[2] = z;
+    mPivot = vec3(x, y, z);
 }
 
 void Object::SetPivot(vec3 pivot) {
-    mPivot[0] = pivot.x;
-    mPivot[1] = pivot.y;
-    mPivot[2] = pivot.z;
-}
-
-float Object::GetPivotX() const{
-    return mPivot[0];
-}
-
-float Object::GetPivotY() const{
-    return mPivot[1];
-}
-float Object::GetPivotZ() const{
-    return mPivot[2];
+    mPivot = pivot;
 }
 
 vec3 Object::GetPivot() const{
-    return vec3(mPivot[0], mPivot[1], mPivot[2]);
+    return mPivot;
 }
 
 /// Prefer using SetPosition, SetRotation and SetEulerAngles to work with the model outside the class
@@ -187,12 +168,17 @@ void Object::EvalModelMatrix() {
     mat4 objScale = scale(mat4(1.0), vec3(mScale));
     mat4 objPosition = translate(mat4(1.0), vec3(mPosition));
     
+    mat4 toPivot = translate(mat4(1.0), -vec3(mPivot));
+
     mat4 objRotation = mat4(1.0);
     objRotation = rotate(objRotation, radians(mEulerAngles.x), vec3(1.0f, 0.0f, 0.0f));
-    objRotation = rotate(objRotation, radians(mEulerAngles.y), vec3(0.0f, 1.0f, 0.0f)); 
-    objRotation = rotate(objRotation, radians(mEulerAngles.z), vec3(0.0f, 0.0f, 1.0f)); 
+    objRotation = rotate(objRotation, radians(mEulerAngles.y), vec3(0.0f, 1.0f, 0.0f));
+    objRotation = rotate(objRotation, radians(mEulerAngles.z), vec3(0.0f, 0.0f, 1.0f));
 
-    mat4 objTransform = mInheritedModelMatrix * objPosition * objRotation;
+    mat4 fromPivot = translate(mat4(1.0), vec3(mPivot));
+
+    mat4 objTransform = mInheritedModelMatrix * objPosition * fromPivot * objRotation * toPivot;
+
     Model(objTransform * objScale);
 }
 
@@ -235,21 +221,7 @@ void Object::LoadTexture2DSimpleBmp(const char *name,int headerSize,int width,in
     mTextures->LoadSimpleBmp(headerSize,width,height,BGR);
 }
 
-
-// wip, will delete
-string vec3Str(vec3 v) {
-    // look at this mess to interpolate a string. this fucking language man
-    stringstream ss;
-    ss << "(" << v.x << ", " << v.y << ", " << v.z << ")";
-    return ss.str();
-}
-
-void Object::Render(GLint position,GLint normal,GLint texcoord){
-    //printf("pos: %s rot: %s scale: %s \n", 
-    //    vec3Str(mPosition).c_str(), 
-    //    vec3Str(mEulerAngles).c_str(), 
-    //    vec3Str(mScale).c_str());
-    
+void Object::Render(GLint position,GLint normal,GLint texcoord){    
     if (isModelMatrixDirty) {
         EvalModelMatrix();
         isModelMatrixDirty = false;

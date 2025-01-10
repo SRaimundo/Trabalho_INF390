@@ -8,7 +8,13 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <string>
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+
 using namespace std;
+using namespace glm;
 
 GLchar *readTextFile(const char *name){
     FILE *fp;
@@ -32,6 +38,12 @@ GLchar *readTextFile(const char *name){
 
     fclose(fp);
     return content;
+}
+
+static string toString(vec3 v) {
+    stringstream ss;
+    ss << "(" << v.x << ", " << v.y << ", " << v.z << ")";
+    return ss.str();
 }
 
 static void CreateVertexBufferTriangle(GLuint &VBO, GLuint &EBO, int &v_number, int &i_number){

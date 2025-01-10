@@ -8,6 +8,7 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
+#include "utils.h"
 #include "object.h"
 
 using namespace std;
@@ -29,8 +30,6 @@ public:
 	void Move(vec3 movement);
     vector<Object*> GetObjects();
 private:
-	float mSpeed;
-
     vector<Object*> mObjects;
 
 	Object* mBody;
@@ -50,10 +49,24 @@ private:
 
 	Object* mLeftFan;
 	Object* mRightFan;
+
+    vec3 mMovement = vec3(0);
+
+    float mSpeed = 1;
+    float mFanRotation = 0;
+    float mFanRotationSpeed = 15;
 };
 
 void Airplane::Update() {
+    mFanRotation += fmod(mFanRotationSpeed, 360);
+    mLeftFan->SetEulerAngles(vec3(0, mFanRotation, 0));
 
+    mMovement.x = mSpeed;
+    mBody->SetPosition(mBody->GetPosition() + mMovement);
+
+    printf("pos: %s rot: %s \n", 
+        toString(mBody->GetPosition()).c_str(), 
+        toString(mBody->GetPosition()).c_str());
 }
 
 void Airplane::SetPosition(vec3 position) {
@@ -92,6 +105,7 @@ Airplane::Airplane() {
 
     mLeftFan = read_obj_file("models/osprey/Left_Fan.obj");
     mLeftFan->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
+    mLeftFan->SetPivot(vec3(-0.09, 5.7, 6.5));
 
     mLeftFlap = read_obj_file("models/osprey/Left_Flap.obj");
     mLeftFlap->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
