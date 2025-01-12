@@ -77,17 +77,18 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     
     // identify holding the key down, GLFW_PRESS vs GLFW_RELEASE (both generate callbacks)
     switch (key) {
+        printf("key\n");
         case GLFW_KEY_LEFT:
-            airplaneInput.mLeft = action == GLFW_PRESS ? true : false;
+            airplaneInput.mLeft = action == GLFW_PRESS ? true : action == GLFW_RELEASE ? false : airplaneInput.mLeft;
             break;
         case GLFW_KEY_RIGHT:
-            airplaneInput.mRight = action == GLFW_PRESS ? true : false;
+            airplaneInput.mRight = action == GLFW_PRESS ? true : action == GLFW_RELEASE ? false : airplaneInput.mRight;
             break;
         case GLFW_KEY_UP:
-            airplaneInput.mUp = action == GLFW_PRESS ? true : false;
+            airplaneInput.mUp = action == GLFW_PRESS ? true : action == GLFW_RELEASE ? false : airplaneInput.mUp;
             break;
         case GLFW_KEY_DOWN:
-            airplaneInput.mDown = action == GLFW_PRESS ? true : false;
+            airplaneInput.mDown = action == GLFW_PRESS ? true : action == GLFW_RELEASE ? false : airplaneInput.mDown;
             break;
         default:
             break;
