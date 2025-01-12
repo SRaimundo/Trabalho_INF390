@@ -18,10 +18,12 @@ using namespace std;
 bool ortho_per = true;
 GLint SCREEN_WIDTH = 800,SCREEN_HEIGHT = 800; 
 
-int worldx=0, worldy=60, worldz=0;
+int worldx=0, worldy=10, worldz=0;
 glm::vec3 camera(40.0f,0.0f,40.0f);
 glm::vec3 initCamera(40.0f,0.0f,40.0f);
 float camerax=0.0,cameray=0.0,cameraz=5.0;
+
+AirplaneInput airplaneInput;
 
 static void error_callback(int error, const char* description){
     fprintf(stderr, "Error: %s\n", description);
@@ -35,47 +37,75 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     if ( key == GLFW_KEY_O && action == GLFW_PRESS ) 
        ortho_per = false;
     if(action == GLFW_PRESS){
-        switch (key){
+        switch (key) {
         case GLFW_KEY_Q:
-            if(mods == GLFW_MOD_SHIFT){
-                worldx = (worldx + 5)%360;
-            }else{
-                worldx = (worldx - 5)%360;
+            if (mods == GLFW_MOD_SHIFT) {
+                worldx = (worldx + 5) % 360;
+            }
+            else {
+                worldx = (worldx - 5) % 360;
             }
             break;
         case GLFW_KEY_W:
-            if(mods == GLFW_MOD_SHIFT){
-                worldy = (worldy + 5)%360;
-            }else{
-                worldy = (worldy - 5)%360;
+            if (mods == GLFW_MOD_SHIFT) {
+                worldy = (worldy + 5) % 360;
+            }
+            else {
+                worldy = (worldy - 5) % 360;
             }
             break;
         case GLFW_KEY_E:
-            if(mods == GLFW_MOD_SHIFT){
-                worldz = (worldz + 5)%360;
-            }else{
-                worldz = (worldz - 5)%360;
+            if (mods == GLFW_MOD_SHIFT) {
+                worldz = (worldz + 5) % 360;
+            }
+            else {
+                worldz = (worldz - 5) % 360;
             }
             break;
         case GLFW_KEY_A:
-            if(mods == GLFW_MOD_SHIFT){
+            if (mods == GLFW_MOD_SHIFT) {
                 cameraz = cameraz + 0.1;
-            }else{
+            }
+            else {
                 cameraz = cameraz - 0.1;
             }
             break;
         default:
             break;
         }
-
     }
-
+    
+    // identify holding the key down, GLFW_PRESS vs GLFW_RELEASE (both generate callbacks)
+    switch (key) {
+        case GLFW_KEY_LEFT:
+            airplaneInput.mLeft = action == GLFW_PRESS ? true : false;
+            break;
+        case GLFW_KEY_RIGHT:
+            airplaneInput.mRight = action == GLFW_PRESS ? true : false;
+            break;
+        case GLFW_KEY_UP:
+            airplaneInput.mUp = action == GLFW_PRESS ? true : false;
+            break;
+        case GLFW_KEY_DOWN:
+            airplaneInput.mDown = action == GLFW_PRESS ? true : false;
+            break;
+        default:
+            break;
+    }
 }
+
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
     }
+}
+
+void ResetInput() {
+    airplaneInput.mDown = false;
+    airplaneInput.mUp = false;
+    airplaneInput.mLeft = false;
+    airplaneInput.mRight = false;
 }
 
 int main(void){
@@ -112,8 +142,11 @@ int main(void){
     // my_scene.SetWireframe(true);
     glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-    my_scene.LookAt(40.0, 0.0, 40.0, 0.0, 0.0, 0.0, 0.0, 10.0, 0.0);
 
+
+    my_scene.LookAt(35, 25, 0, 0, 10, 0, 0.0, 10.0, 0.0);
+
+    ResetInput();
 
     while (!glfwWindowShouldClose(window)){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -123,16 +156,19 @@ int main(void){
             my_scene.Ortho3D(-2.0, 2.0, -2.0, 2.0, 0.0, 200.0);
         }
 
+        //printf("%d %d %d\n", worldx, worldy, worldz);
+
+        plane.Input(airplaneInput);
         plane.Update();
 
-        glm::vec3 viewPoint = glm::vec3(plane.GetModelMatrix()*glm::vec4(0.0f,0.0f,0.0f,1.0f));
+        //glm::vec3 viewPoint = glm::vec3(plane.GetModelMatrix()*glm::vec4(0.0f,0.0f,0.0f,1.0f));
 
-        glm::vec3 nextCameraView = glm::vec3(plane.GetModelMatrix() * glm::vec4(initCamera,1.0f));
+        //glm::vec3 nextCameraView = glm::vec3(plane.GetModelMatrix() * glm::vec4(initCamera,1.0f));
 
-        nextCameraView = camera*0.99f + nextCameraView*0.01f;
-        camera = nextCameraView;
+        //nextCameraView = camera*0.99f + nextCameraView*0.01f;
+        //camera = nextCameraView;
 
-        my_scene.LookAt(camera[0],camera[1],camera[2],viewPoint[0],viewPoint[1],viewPoint[2],0.0f,1.0f,0.0f);
+        //my_scene.LookAt(camera[0],camera[1],camera[2],viewPoint[0],viewPoint[1],viewPoint[2],0.0f,1.0f,0.0f);
 
         my_scene.Render();
 

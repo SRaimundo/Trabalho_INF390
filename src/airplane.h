@@ -14,21 +14,32 @@
 using namespace std;
 using namespace glm;
 
+struct AirplaneInput {
+    bool mLeft = false;
+    bool mRight = false;
+    bool mUp = false;
+    bool mDown = false;
+};
+
 class Airplane {
 public:
     Airplane();
+
 	void Update();
+    void Input(AirplaneInput input);
     
     void SetPosition(vec3 position);
     void SetEulerAngles(vec3 eulerAngles);
 
+
     vec3 GetPosition() { return mBody->GetPosition(); }
     vec3 GetEulerAngles() { return mBody->GetEulerAngles(); };
 
-    glm::mat4 GetModelMatrix() const;
+    mat4 GetModelMatrix() const;
 
 	void Move(vec3 movement);
     vector<Object*> GetObjects();
+
 private:
     vector<Object*> mObjects;
 
@@ -52,21 +63,26 @@ private:
 
     vec3 mMovement = vec3(0);
 
-    float mSpeed = 1;
+    float mSpeed = 2;
     float mFanRotation = 0;
     float mFanRotationSpeed = 15;
 };
 
 void Airplane::Update() {
     mFanRotation += fmod(mFanRotationSpeed, 360);
+    
     mLeftFan->SetEulerAngles(vec3(0, mFanRotation, 0));
+    mRightFan->SetEulerAngles(vec3(0, mFanRotation, 0));
 
     mMovement.x = mSpeed;
-    mBody->SetPosition(mBody->GetPosition() + mMovement);
 
-    printf("pos: %s rot: %s \n", 
-        toString(mBody->GetPosition()).c_str(), 
-        toString(mBody->GetPosition()).c_str());
+//    printf("pos: %s rot: %s \n", 
+//        toString(mBody->GetPosition()).c_str(), 
+//        toString(mBody->GetPosition()).c_str());
+}
+
+void Airplane::Input(AirplaneInput input) {
+    printf("%d %d %d %d \n", input.mLeft, input.mRight, input.mUp, input.mDown);
 }
 
 void Airplane::SetPosition(vec3 position) {
@@ -78,7 +94,7 @@ void Airplane::SetEulerAngles(vec3 eulerAngles) {
 }
 
 void Airplane::Move(vec3 movement) {
-
+    mBody->SetPosition(mBody->GetPosition() + movement);
 }
 
 glm::mat4 Airplane::GetModelMatrix() const{
@@ -87,46 +103,47 @@ glm::mat4 Airplane::GetModelMatrix() const{
 
 Airplane::Airplane() {
     // wip
-    int x = 100;
-    int y = 400;
-    int z = 400;
+    int x = 0;
+    int y = 1000;
+    int z = 1000;
 
     mBody = read_obj_file("models/osprey/Body.obj");
-    mBody->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
+    mBody->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
 
     mElevator = read_obj_file("models/osprey/Elevator.obj");
-    mElevator->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
+    mElevator->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
 
     mLeftAileron = read_obj_file("models/osprey/Left_Aileron.obj");
-    mLeftAileron->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
+    mLeftAileron->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
 
     mLeftEngine = read_obj_file("models/osprey/Left_Engine.obj");
-    mLeftEngine->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
+    mLeftEngine->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
 
     mLeftFan = read_obj_file("models/osprey/Left_Fan.obj");
-    mLeftFan->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
-    mLeftFan->SetPivot(vec3(-0.09, 5.7, 6.5));
+    mLeftFan->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
+    mLeftFan->SetPivot(vec3(-0.09, 5.7, 6.6));
 
     mLeftFlap = read_obj_file("models/osprey/Left_Flap.obj");
-    mLeftFlap->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
+    mLeftFlap->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
 
     mLeftRudder = read_obj_file("models/osprey/Left_Rudder.obj");
-    mLeftRudder->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
+    mLeftRudder->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
 
     mRightAileron = read_obj_file("models/osprey/Right_Aileron.obj");
-    mRightAileron->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
+    mRightAileron->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
 
     mRightEngine = read_obj_file("models/osprey/Right_Engine.obj");
-    mRightEngine->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
+    mRightEngine->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
 
     mRightFan = read_obj_file("models/osprey/Right_Fan.obj");
-    mRightFan->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
+    mRightFan->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
+    mRightFan->SetPivot(vec3(-0.09, 5.7, -6.6));
 
     mRightFlap = read_obj_file("models/osprey/Right_Flap.obj");
-    mRightFlap->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
+    mRightFlap->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
 
     mRightRudder = read_obj_file("models/osprey/Right_Rudder.obj");
-    mRightRudder->LoadTexture2DSimpleBmp("models/TexturaMetal.bmp", x, y, z);
+    mRightRudder->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
 
     mObjects.push_back(mBody);
     mObjects.push_back(mElevator);
