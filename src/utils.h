@@ -47,20 +47,20 @@ static string toString(vec3 v) {
 }
 
 static vec3 blenderAxis(vec3 v) {
-    //printf("%f %f %f -> %f %f %f\n", v.x, v.y, v.z, v.x, -v.z, v.y);
     return vec3(v.x, v.z, -v.y);
 }
 
 static vec3 glAxis(vec3 v) {
-    //printf("%f %f %f -> %f %f %f\n", v.x, v.y, v.z, v.x, -v.z, v.y);
     return vec3(v.x, -v.z, v.y);
 }
 
-static float Lerp(float a, float b, float f)
+static double Lerp(double a, double b, double t)
 {
-    return a * (1.0 - f) + (b * f);
+    if (t <= 0.5)
+        return a + (b - a) * t;
+    else
+        return b - (b - a) * (1.0 - t);
 }
-
 static void CreateVertexBufferTriangle(GLuint &VBO, GLuint &EBO, int &v_number, int &i_number){
     GLfloat Vertices[9][3] = {
         {0.0f, 0.0f, 0.0f},

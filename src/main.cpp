@@ -29,6 +29,10 @@ static void error_callback(int error, const char* description){
     fprintf(stderr, "Error: %s\n", description);
 }
  
+static bool evalInput(bool input, int action) {
+    return action == GLFW_PRESS ? true : action == GLFW_RELEASE ? false : input;
+}
+
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
@@ -79,16 +83,22 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     switch (key) {
         printf("key\n");
         case GLFW_KEY_LEFT:
-            airplaneInput.mLeft = action == GLFW_PRESS ? true : action == GLFW_RELEASE ? false : airplaneInput.mLeft;
+            airplaneInput.mLeft = evalInput(airplaneInput.mLeft, action);
             break;
         case GLFW_KEY_RIGHT:
-            airplaneInput.mRight = action == GLFW_PRESS ? true : action == GLFW_RELEASE ? false : airplaneInput.mRight;
+            airplaneInput.mRight = evalInput(airplaneInput.mRight, action);
             break;
         case GLFW_KEY_UP:
-            airplaneInput.mUp = action == GLFW_PRESS ? true : action == GLFW_RELEASE ? false : airplaneInput.mUp;
+            airplaneInput.mUp = evalInput(airplaneInput.mUp, action);
             break;
         case GLFW_KEY_DOWN:
-            airplaneInput.mDown = action == GLFW_PRESS ? true : action == GLFW_RELEASE ? false : airplaneInput.mDown;
+            airplaneInput.mDown = evalInput(airplaneInput.mDown, action);
+            break;
+        case GLFW_KEY_Z:
+            airplaneInput.mTakeOff = evalInput(airplaneInput.mTakeOff, action);
+            break;
+        case GLFW_KEY_X:
+            airplaneInput.mLand = evalInput(airplaneInput.mLand, action);
             break;
         default:
             break;
@@ -145,7 +155,7 @@ int main(void){
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 
-    my_scene.LookAt(35, 25, 0, 0, 10, 0, 0.0, 10.0, 0.0);
+    my_scene.LookAt(100, 25, 0, 0, 10, 0, 0.0, 10.0, 0.0);
 
     ResetInput();
 
