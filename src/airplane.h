@@ -8,6 +8,8 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
+#include <list>
+#include <vector>
 #include "utils.h"
 #include "object.h"
 
@@ -21,6 +23,14 @@ struct AirplaneInput {
     bool mDown = false;
     bool mTakeOff = false;
     bool mLand = false;
+};
+
+struct Tween {
+    float* value;
+    float startValue;
+    float finalValue;
+    float stepPercentage;
+    bool ended = false;
 };
 
 class Airplane {
@@ -71,71 +81,163 @@ private:
 
     bool mIsTakingOff = false; 
     bool mIsLanding = false; 
-    bool mIsOnAir = false;  
     bool mIsGrounded = true;
 
     float mSpeed = 2;
     float mFanRotation = 0;
     float mFanRotationSpeed = 0;
     float mFanMaxRotationSpeed = 50;
+
+    list<Tween> mTweens = {};
+    list<Tween*> mTweensToClean = {};
+
+    void TweenRoutine();
 };
 
-void Airplane::Land() {}
+
+// just testing what could be done with tweens instead of handling so many lerps all around
+// currently not being used, but prob will use to reset plane rotations when landing and taking off (instead of 
+// handling many states from each part)
+void Airplane::TweenRoutine() {
+    for (auto tween : mTweens) {
+        float currentValue = *(tween.value);
+        currentValue = currentValue + ((tween.finalValue - tween.startValue) * tween.stepPercentage);
+        if (Near(*(tween.value), tween.finalValue, 0.001)) {
+            currentValue = tween.finalValue;
+            tween.ended = true;
+        }
+        *(tween.value) = currentValue;
+    }
+
+    // credits: https://stackoverflow.com/questions/67710057/how-exactly-remove-if-works
+    mTweens.resize(std::distance(
+        mTweens.begin(),
+        remove_if(mTweens.begin(), mTweens.end(), [](Tween t) {return t.ended;})
+    ));
+}
+
+void Airplane::Land() {
+
+    float landTimeScale = 10.0f;
+
+    vec3 leftEngineEulerAngles = blenderAxis(mLeftEngine->GetEulerAngles());
+    vec3 rightEngineEulerAngles = blenderAxis(mRightEngine->GetEulerAngles());
+    vec3 position = blenderAxis(mBody->GetPosition());
+
+    leftEngineEulerAngles.y = Lerp(leftEngineEulerAngles.y, 0, 0.005 * landTimeScale);
+    rightEngineEulerAngles.y = Lerp(rightEngineEulerAngles.y, 0, 0.005 * landTimeScale);
+
+    float groundHeight = 0;
+
+    // jet engines are upwards
+    if (Near(leftEngineEulerAngles.y, 0, 0.5)) {
+        leftEngineEulerAngles.y = 0;
+        rightEngineEulerAngles.y = 0;
+
+        if (!Near(position.z, groundHeight, 0.1)) {
+            // decrease fan rotation speed 
+            mFanRotationSpeed = Lerp(mFanRotationSpeed, 20, 0.003 * landTimeScale);
+
+            float fanSpeedInverseRatio = 1 - (mFanRotationSpeed / mFanMaxRotationSpeed);
+
+            // get the airplane down
+            float positionLerpRatio = fanSpeedInverseRatio * fanSpeedInverseRatio * fanSpeedInverseRatio;
+            position.z = Lerp(position.z, groundHeight, positionLerpRatio * 0.01 * landTimeScale);
+            printf("%s\n", toString(position).c_str());
+        }
+        else {
+
+            // on ground, begin to turn engines off
+            mFanRotationSpeed = Lerp(mFanRotationSpeed, 0, 0.005 * landTimeScale);
+
+            if (Near(mFanRotationSpeed, 0, 0.5)) {
+                mFanRotationSpeed = 0;
+                mIsLanding = false;
+                mIsGrounded = true;
+            }
+
+            position.z = 0;
+        }
+    }
+
+    mBody->SetPosition(glAxis(position));
+    mLeftEngine->SetEulerAngles(glAxis(leftEngineEulerAngles));
+    mRightEngine->SetEulerAngles(glAxis(rightEngineEulerAngles));
+}
 
 void Airplane::TakeOff() {
+    
+    float takeOffTimeScale = 10.0f;
+    
     // increase fan rotation
     // initial take off
     vec3 leftEngineEulerAngles = blenderAxis(mLeftEngine->GetEulerAngles());
     vec3 rightEngineEulerAngles = blenderAxis(mRightEngine->GetEulerAngles());
     vec3 position = blenderAxis(mBody->GetPosition());
 
-    float takeOffHeight = 40.0f;
+    float takeOffHeight = -40.0f;
 
-    if (position.z < takeOffHeight) {
-        mFanRotationSpeed = Lerp(mFanRotationSpeed, mFanMaxRotationSpeed, 0.001);
+    if (!Near(position.z, takeOffHeight, 1)) {
+        mIsGrounded = false;
 
-        leftEngineEulerAngles.y = Lerp(leftEngineEulerAngles.y, 0, 0.1);
-        rightEngineEulerAngles.y = Lerp(rightEngineEulerAngles.y, 0, 0.1);
+        mFanRotationSpeed = Lerp(mFanRotationSpeed, mFanMaxRotationSpeed, 0.001 * takeOffTimeScale);
 
-        mLeftEngine->SetEulerAngles(glAxis(leftEngineEulerAngles));
-        mRightEngine->SetEulerAngles(glAxis(rightEngineEulerAngles));
+        leftEngineEulerAngles.y = Lerp(leftEngineEulerAngles.y, 0, 0.1 * takeOffTimeScale);
+        rightEngineEulerAngles.y = Lerp(rightEngineEulerAngles.y, 0, 0.1 * takeOffTimeScale);
 
         float fanSpeedRatio = mFanRotationSpeed / mFanMaxRotationSpeed;
 
         // due to how the axis are converted between gl and blender axis, direct z values have to be negative
-        position.z = Lerp(position.z, -takeOffHeight, fanSpeedRatio * fanSpeedRatio * fanSpeedRatio * 0.01);
+        position.z = Lerp(position.z, takeOffHeight, fanSpeedRatio * fanSpeedRatio * fanSpeedRatio * 0.05 * takeOffTimeScale);
         printf("%s\n", toString(position).c_str());
         mBody->SetPosition(glAxis(position));
     }
     // on air, rotate the engines forward and finish takeoff
     else {
-        leftEngineEulerAngles.y = Lerp(leftEngineEulerAngles.y, 90, 0.05);
-        rightEngineEulerAngles.y = Lerp(rightEngineEulerAngles.y, 90, 0.05);
+        leftEngineEulerAngles.y = Lerp(leftEngineEulerAngles.y, 90, 0.02 * takeOffTimeScale);
+        rightEngineEulerAngles.y = Lerp(rightEngineEulerAngles.y, 90, 0.02 * takeOffTimeScale);
 
-        mLeftEngine->SetEulerAngles(glAxis(leftEngineEulerAngles));
-        mRightEngine->SetEulerAngles(glAxis(rightEngineEulerAngles));
+        if (Near(leftEngineEulerAngles.y, 90, 1)) {
+            mIsTakingOff = false;
+            leftEngineEulerAngles.y = 90;
+            rightEngineEulerAngles.y = 90;
+        }
     }
+
+    mLeftEngine->SetEulerAngles(glAxis(leftEngineEulerAngles));
+    mRightEngine->SetEulerAngles(glAxis(rightEngineEulerAngles));
 }
 
 void Airplane::Update() {
+    TweenRoutine();
+
+    //printf("%f\n", mSpeed);
+
+    //return;
+
     printf("Pos: %s - Rot: %s - Input: (l: %d r: %d u: %d d:%d)\n", 
         toString(GetPosition()).c_str(),
         toString(GetEulerAngles()).c_str(),
         mInput.mLeft, mInput.mRight, mInput.mUp, mInput.mDown);
 
-
     mFanRotation += fmod(mFanRotationSpeed, 360);
     mLeftFan->SetEulerAngles(glAxis(vec3(0, 0, mFanRotation)));
     mRightFan->SetEulerAngles(glAxis(vec3(0, 0, mFanRotation + 15)));
 
-    if (mIsGrounded) 
-    {
-        if (mIsTakingOff) 
-            TakeOff();
-        return; 
+    if (mInput.mTakeOff && !mIsLanding && mIsGrounded) {
+        mIsTakingOff = true;
     }
 
-    if (mIsOnAir && mIsLanding) {
+    if (mInput.mLand && !mIsTakingOff && !mIsGrounded) {
+        mIsLanding = true;
+    }
+
+    if (mIsTakingOff) {
+        TakeOff();
+        return;
+    }
+
+    if (mIsLanding) {
         Land();
         return;
     }
@@ -180,16 +282,6 @@ void Airplane::Update() {
 
 void Airplane::Input(AirplaneInput input) {
     mInput = input;
-
-    if (mInput.mTakeOff) {
-        mIsTakingOff = true;
-        mIsLanding = false;
-    }
-
-    if (mInput.mLand) {
-        mIsLanding = true;
-        mIsTakingOff = false;
-    }
 }
 
 void Airplane::SetPosition(vec3 position) {
@@ -209,6 +301,9 @@ mat4 Airplane::GetModelMatrix() const{
 }
 
 Airplane::Airplane() {
+    //Tween t = { &mSpeed, mSpeed, -11, 0.1 };
+    //mTweens.push_back(t);
+
     // wip
     int x = 0;
     int y = 1000;

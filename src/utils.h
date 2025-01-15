@@ -61,6 +61,11 @@ static double Lerp(double a, double b, double t)
     else
         return b - (b - a) * (1.0 - t);
 }
+
+static bool Near(double a, double b, double epsilon = 0.01) {
+    return abs(a - b) < epsilon;
+}
+
 static void CreateVertexBufferTriangle(GLuint &VBO, GLuint &EBO, int &v_number, int &i_number){
     GLfloat Vertices[9][3] = {
         {0.0f, 0.0f, 0.0f},
