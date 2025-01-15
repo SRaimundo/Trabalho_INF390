@@ -155,7 +155,7 @@ int main(void){
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 
-    my_scene.LookAt(100, 25, 0, 0, 10, 0, 0.0, 10.0, 0.0);
+    my_scene.LookAt(35, 25, 0, 0, 10, 0, 0.0, 10.0, 0.0);
 
     ResetInput();
 
@@ -167,19 +167,18 @@ int main(void){
             my_scene.Ortho3D(-2.0, 2.0, -2.0, 2.0, 0.0, 200.0);
         }
 
-        //printf("%d %d %d\n", worldx, worldy, worldz);
 
         plane.Input(airplaneInput);
         plane.Update();
 
-        //glm::vec3 viewPoint = glm::vec3(plane.GetModelMatrix()*glm::vec4(0.0f,0.0f,0.0f,1.0f));
+        glm::vec3 viewPoint = glm::vec3(plane.GetModelMatrix()*glm::vec4(0.0f,0.0f,0.0f,1.0f));
 
-        //glm::vec3 nextCameraView = glm::vec3(plane.GetModelMatrix() * glm::vec4(initCamera,1.0f));
+        glm::vec3 nextCameraView = glm::vec3(plane.GetModelMatrix() * glm::vec4(initCamera,1.0f));
 
-        //nextCameraView = camera*0.99f + nextCameraView*0.01f;
-        //camera = nextCameraView;
+        nextCameraView = camera*0.99f + nextCameraView*0.01f;
+        camera = nextCameraView;
 
-        //my_scene.LookAt(camera[0],camera[1],camera[2],viewPoint[0],viewPoint[1],viewPoint[2],0.0f,1.0f,0.0f);
+        my_scene.LookAt(camera[0],camera[1],camera[2],viewPoint[0],viewPoint[1],viewPoint[2],0.0f,1.0f,0.0f);
 
         my_scene.Render();
 
