@@ -42,6 +42,8 @@ public:
     
     void SetWireframe(bool on_wireframe) { mIsWireframe = on_wireframe; };
     void LoadTexture2DSimpleBmp(const char *name,int header_size,int Width,int Height,int BGR=0);
+    void SetTextureCombinationEnabled(bool enabled) {mIsTextureCombinationEnabled = enabled;};
+    bool GetTextureCombinationEnabled() const;
     
     void AddDependency(Object* obj);
     void AddDependencies(vector<Object*> objects);
@@ -82,6 +84,7 @@ private:
 
     bool mIsNoTexture;
     Texture *mTextures;
+    bool mIsTextureCombinationEnabled;
 
     //Dependencies for facilitating transformations
     //it's not great, but in this case, it's ok
@@ -114,6 +117,7 @@ Object::Object(int verticesNumber,int indexNumber, GLfloat *Vertices_information
     mScale = vec3(1.0);
 
     mPivot[0] = mPivot[1] = mPivot[2] = 0;
+    mIsTextureCombinationEnabled = false;
 }
 
 Object::~Object(){
@@ -200,6 +204,10 @@ void Object::PushLeftMatrix(mat4 matrix){
 
 mat4 Object::GetModelMatrix() {
     return mModelMatrix;
+}
+
+bool Object::GetTextureCombinationEnabled() const{
+    return mIsTextureCombinationEnabled;
 }
 
 void Object::AddDependency(Object* obj){

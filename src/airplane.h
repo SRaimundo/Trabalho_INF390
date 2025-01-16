@@ -10,6 +10,7 @@
 #include <fstream>
 #include <list>
 #include <vector>
+#include <algorithm>
 #include "utils.h"
 #include "object.h"
 

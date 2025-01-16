@@ -154,7 +154,12 @@ void Scene::Render(){
         glUniformMatrix4fv(mv_u, 1, GL_FALSE, glm::value_ptr(mView * ((**it).mModelMatrix)));
         glUniformMatrix3fv(normal_u, 1, GL_FALSE, glm::value_ptr(glm::inverseTranspose(glm::mat3(mView * ((**it).mModelMatrix)))));
         
-        glUniform1i(texture_combiner_u,0);
+        if((**it).GetTextureCombinationEnabled()){
+            glUniform1i(texture_combiner_u,1);
+        }else{
+            glUniform1i(texture_combiner_u,0);
+        }
+
         (**it).mTextures->Bind(GL_TEXTURE0);
         
         (**it).Render(position,normal,texcoord);
