@@ -19,8 +19,10 @@ bool ortho_per = true;
 GLint SCREEN_WIDTH = 800,SCREEN_HEIGHT = 800; 
 
 int worldx=0, worldy=10, worldz=0;
-glm::vec3 camera(40.0f,0.0f,40.0f);
-glm::vec3 initCamera(40.0f,0.0f,40.0f);
+// glm::vec3 camera(40.0f,0.0f,40.0f); // side view
+// glm::vec3 initCamera(40.0f,0.0f,40.0f); // side view
+glm::vec3 camera(40.0f,5.0f,1.0f); // rear view
+glm::vec3 initCamera(40.0f,5.0f,1.0f); // rear view
 float camerax=0.0,cameray=0.0,cameraz=5.0;
 
 AirplaneInput airplaneInput;
@@ -171,14 +173,14 @@ int main(void){
         plane.Input(airplaneInput);
         plane.Update();
 
-        glm::vec3 viewPoint = glm::vec3(plane.GetModelMatrix()*glm::vec4(0.0f,0.0f,0.0f,1.0f));
+        glm::vec3 planePosition = glm::vec3(plane.GetModelMatrix()*glm::vec4(0.0f,0.0f,0.0f,1.0f));
 
         glm::vec3 nextCameraView = glm::vec3(plane.GetModelMatrix() * glm::vec4(initCamera,1.0f));
 
-        nextCameraView = camera*0.99f + nextCameraView*0.01f;
+        nextCameraView = camera*0.995f + nextCameraView*0.005f;
         camera = nextCameraView;
 
-        my_scene.LookAt(camera[0],camera[1],camera[2],viewPoint[0],viewPoint[1],viewPoint[2],0.0f,1.0f,0.0f);
+        my_scene.LookAt(camera[0], camera[1], camera[2], planePosition[0], planePosition[1], planePosition[2], 0.0f, 1.0f, 0.0f);
 
         my_scene.Render();
 
