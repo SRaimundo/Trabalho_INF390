@@ -3,6 +3,7 @@
 
 #include <glad/glad.h>
 #define GLFW_INCLUDE_NONE
+#define GLM_ENABLE_EXPERIMENTAL
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <string.h>
@@ -12,6 +13,7 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 using namespace std;
 using namespace glm;
@@ -53,6 +55,44 @@ static vec3 blenderAxis(vec3 v) {
 static vec3 glAxis(vec3 v) {
     return vec3(v.x, -v.z, v.y);
 }
+
+//def euler_to_forward_vector(pitch, yaw, roll) :
+//    # Convert degrees to radians
+//    pitch = math.radians(pitch)
+//    yaw = math.radians(yaw)
+//    # Roll is not used for forward vector
+//
+//    # Calculate forward vector
+//    forward_x = math.cos(yaw) * math.cos(pitch)
+//    forward_y = math.sin(pitch)
+//    forward_z = math.sin(yaw) * math.cos(pitch)
+//
+//    return (forward_x, forward_y, forward_z)
+//
+//    # Example usage
+//    pitch, yaw, roll = 30, 45, 0  # In degrees
+//    forward_vector = euler_to_forward_vector(pitch, yaw, roll)
+//    print("Forward Vector:", forward_vector)
+
+static vec3 Forward(float x, float y, float z) {
+    float pitch = radians(x);
+    float yaw = radians(y);
+    float roll = radians(z);
+
+    quat quaternion = quat(vec3(pitch, yaw, roll));
+
+    mat4 rotationMatrix = toMat4(quaternion);
+
+    vec3 forward = vec3(rotationMatrix[2]); 
+    forward = -normalize(forward); 
+
+    return forward;
+}
+
+static vec3 Forward(vec3 eulerAngles) {
+    return Forward(eulerAngles.x, eulerAngles.y, eulerAngles.z);
+}
+
 
 static double Lerp(double a, double b, double t)
 {
