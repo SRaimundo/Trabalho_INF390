@@ -177,7 +177,7 @@ int main(void){
 
             glm::vec3 nextCameraView = glm::vec3(airplane.GetModelMatrix() * glm::vec4(initCamera,1.0f));
 
-            nextCameraView = camera*0.9f + nextCameraView*0.1f;
+            nextCameraView = camera*0.95f + nextCameraView*0.05f;
             camera = nextCameraView;
 
             my_scene.LookAt(camera[0], camera[1], camera[2], planePosition[0], planePosition[1], planePosition[2], 0.0f, 1.0f, 0.0f);
