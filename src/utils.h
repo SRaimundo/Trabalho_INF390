@@ -56,24 +56,6 @@ static vec3 glAxis(vec3 v) {
     return vec3(v.x, -v.z, v.y);
 }
 
-//def euler_to_forward_vector(pitch, yaw, roll) :
-//    # Convert degrees to radians
-//    pitch = math.radians(pitch)
-//    yaw = math.radians(yaw)
-//    # Roll is not used for forward vector
-//
-//    # Calculate forward vector
-//    forward_x = math.cos(yaw) * math.cos(pitch)
-//    forward_y = math.sin(pitch)
-//    forward_z = math.sin(yaw) * math.cos(pitch)
-//
-//    return (forward_x, forward_y, forward_z)
-//
-//    # Example usage
-//    pitch, yaw, roll = 30, 45, 0  # In degrees
-//    forward_vector = euler_to_forward_vector(pitch, yaw, roll)
-//    print("Forward Vector:", forward_vector)
-
 static vec3 Forward(float x, float y, float z) {
     float pitch = radians(x);
     float yaw = radians(y);

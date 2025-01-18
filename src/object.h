@@ -35,6 +35,10 @@ public:
     vec3 GetPosition() { return mPosition; }
     vec3 GetEulerAngles() { return mEulerAngles; };
 
+    vec3 GetGlobalPosition() { return mPosition; }
+    vec3 GetGlobalEulerAngles() { return mEulerAngles; };
+
+
     mat4 GetModelMatrix();
     
     void PushRightMatrix(mat4 matrix);
@@ -53,13 +57,13 @@ public:
 
     vec3 GetPivot() const;
 
-    void SetInheritedModel(mat4 matrixModel);
+    void Model(mat4 modelMatrix);
+    void EvalModelMatrix();
+
+    void SetInheritedModel(mat4 matrixModel, bool propagate = true);
 
 private:
     void Render(GLint position,GLint normal,GLint texcoord);
-
-    void Model(mat4 modelMatrix);
-    void EvalModelMatrix();
 
     bool mIsIndexed;
     bool mIsWireframe;
@@ -186,13 +190,17 @@ void Object::EvalModelMatrix() {
     Model(objTransform * objScale);
 }
 
-void Object::SetInheritedModel(mat4 modelMatrix) {
+void Object::SetInheritedModel(mat4 modelMatrix, bool propagate) {
     mInheritedModelMatrix = modelMatrix;
     isModelMatrixDirty = true;
-    for (Object* obj : mDependencies) {
-        obj->SetInheritedModel(mInheritedModelMatrix * mModelMatrix);
+
+    if (propagate) {
+        for (Object* obj : mDependencies) {
+            obj->SetInheritedModel(mInheritedModelMatrix * mModelMatrix);
+        }
     }
 }
+
 
 void Object::PushRightMatrix(mat4 matrix){
     mModelMatrix = mModelMatrix * matrix;
