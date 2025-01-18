@@ -47,8 +47,8 @@ public:
     void TakeOff();
     void Land();
 
-    vec3 GetPosition() { return mHierarchy_1->GetPosition(); }
-    vec3 GetEulerAngles() { return mHierarchy_1->GetEulerAngles(); };
+    vec3 GetPosition() { return mBody->GetPosition(); }
+    vec3 GetEulerAngles() { return mBody->GetEulerAngles(); };
 
     mat4 GetModelMatrix() const;
 
@@ -58,10 +58,7 @@ public:
 private:
     vector<Object*> mObjects;
 
-	Object* mHierarchy_1;
-    Object* mHierarchy_2;
-
-    Object* mPlane;
+	Object* mBody;
     Object* mElevator;
 
 	Object* mLeftAileron;
@@ -87,10 +84,11 @@ private:
     bool mIsLanding = false; 
     bool mIsGrounded = true;
 
-    float mSpeed = 0.01;
+    float mSpeed = 0.05;
     float mFanRotation = 0;
     float mFanRotationSpeed = 0;
     float mFanMaxRotationSpeed = 50;
+    float mRollSpeed = 2;
 
     float mMaxRoll = 80;
     float mMaxPitch = 50;
@@ -125,11 +123,11 @@ void Airplane::TweenRoutine() {
 
 void Airplane::Land() {
 
-    float landTimeScale = 10.0f;
+    float landTimeScale = 3.0f;
 
     vec3 leftEngineEulerAngles = blenderAxis(mLeftEngine->GetEulerAngles());
     vec3 rightEngineEulerAngles = blenderAxis(mRightEngine->GetEulerAngles());
-    vec3 position = blenderAxis(mHierarchy_1->GetPosition());
+    vec3 position = blenderAxis(mBody->GetPosition());
 
     leftEngineEulerAngles.y = Lerp(leftEngineEulerAngles.y, 0, 0.005 * landTimeScale);
     rightEngineEulerAngles.y = Lerp(rightEngineEulerAngles.y, 0, 0.005 * landTimeScale);
@@ -167,20 +165,20 @@ void Airplane::Land() {
         }
     }
 
-    mHierarchy_1->SetPosition(glAxis(position));
+    mBody->SetPosition(glAxis(position));
     mLeftEngine->SetEulerAngles(glAxis(leftEngineEulerAngles));
     mRightEngine->SetEulerAngles(glAxis(rightEngineEulerAngles));
 }
 
 void Airplane::TakeOff() {
     
-    float takeOffTimeScale = 10.0f;
+    float takeOffTimeScale = 3.0f;
     
     // increase fan rotation
     // initial take off
     vec3 leftEngineEulerAngles = blenderAxis(mLeftEngine->GetEulerAngles());
     vec3 rightEngineEulerAngles = blenderAxis(mRightEngine->GetEulerAngles());
-    vec3 position = blenderAxis(mHierarchy_1->GetPosition());
+    vec3 position = blenderAxis(mBody->GetPosition());
 
     float takeOffHeight = -40.0f;
 
@@ -197,7 +195,7 @@ void Airplane::TakeOff() {
         // due to how the axis are converted between gl and blender axis, direct z values have to be negative
         position.z = Lerp(position.z, takeOffHeight, fanSpeedRatio * fanSpeedRatio * fanSpeedRatio * 0.05 * takeOffTimeScale);
         printf("%s\n", toString(position).c_str());
-        mHierarchy_1->SetPosition(glAxis(position));
+        mBody->SetPosition(glAxis(position));
     }
     // on air, rotate the engines forward and finish takeoff
     else {
@@ -253,7 +251,7 @@ void Airplane::Update() {
 
 
     vec3 elevatorEulerAngles = blenderAxis(mElevator->GetEulerAngles());
-    vec3 bodyEulerAngles = blenderAxis(mHierarchy_1->GetEulerAngles());
+    vec3 bodyEulerAngles = blenderAxis(mBody->GetEulerAngles());
 
     quat currentOrientation = quat(vec3(bodyEulerAngles.y, bodyEulerAngles.z, bodyEulerAngles.x));
     vec3 localForward = currentOrientation * vec3(1.0, 0.0, 0.0);
@@ -266,33 +264,83 @@ void Airplane::Update() {
     
     // pitch
     if (mInput.mDown || mInput.mUp) {
-        elevatorEulerAngles.y = Lerp(elevatorEulerAngles.y, mInput.mDown ? -30.0 : 30, 0.1);
+        elevatorEulerAngles.y = Lerp(elevatorEulerAngles.y, mInput.mDown ? 50.0 : -50, 0.05);
         mElevator->SetEulerAngles(glAxis(elevatorEulerAngles));
 
         bodyEulerAngles.y = Lerp(bodyEulerAngles.y, mInput.mDown ? bodyEulerAngles.y + mMaxPitch : bodyEulerAngles.y - mMaxPitch, 0.02);
-        mHierarchy_1->SetEulerAngles(glAxis(bodyEulerAngles));
+        mBody->SetEulerAngles(glAxis(bodyEulerAngles));
     }
     else {
         elevatorEulerAngles.y = Lerp(elevatorEulerAngles.y, 0, 0.03);
         mElevator->SetEulerAngles(glAxis(elevatorEulerAngles));
 
-        mHierarchy_1->SetEulerAngles(glAxis(bodyEulerAngles));
+        mBody->SetEulerAngles(glAxis(bodyEulerAngles));
     }
 
+    vec3 lAileronEulerAngles = blenderAxis(mLeftAileron->GetEulerAngles());
+    vec3 rAileronEulerAngles = blenderAxis(mRightAileron->GetEulerAngles());
+
+    vec3 rudderEulerAngles = blenderAxis(mLeftRudder->GetEulerAngles());
     // roll
     if (mInput.mLeft || mInput.mRight) {
-        vec3 hiea = mHierarchy_2->GetEulerAngles();
-        hiea.x += 5.f;
-        mHierarchy_2->SetEulerAngles(hiea);
-        mHierarchy_2->EvalModelMatrix();
-        mHierarchy_1->SetInheritedModel(mHierarchy_2->GetModelMatrix(), false);
-        //mBody->SetEulerAngles(result);
+
+#pragma region retry
+        //quat q = quat(GetEulerAngles(), localForward);
+
+        //vec3 rollEuler = normalize(eulerAngles(rollQuat) * currentOrientation * vec3(-1, 0, 0));
+        //printf("rollEuler: %s", toString(rollEuler).c_str());
+
+        //bodyEulerAngles += mInput.mRight ? rollEuler : -rollEuler;
+
+        //currentOrientation = glm::normalize(rollQuat * currentOrientation);
+        //vec3 newForward = currentOrientation * glm::vec3(0.0f, 0.0f, -1.0f);
+
+        //bodyEulerAngles.x = Lerp(bodyEulerAngles.x, mInput.mRight ? bodyEulerAngles.x + mMaxRoll : bodyEulerAngles.x -mMaxRoll, 0.05);
+        //bodyEulerAngles.y = Lerp(bodyEulerAngles.y, mInput.mDown ? bodyEulerAngles.y + mMaxPitch : bodyEulerAngles.y - mMaxPitch, 0.02);
+
+        //vec3 pivot = mBody->GetPivot();
+        //mat4 objRotation = mat4(1.0);
+        //vec3 eulerA = GetEulerAngles();
+        //mat4 toPivot = translate(mat4(1.0), -vec3(pivot));
+
+        //objRotation = rotate(objRotation, radians(eulerA.x), vec3(1.0f, 0.0f, 0.0f));
+        //objRotation = rotate(objRotation, radians(eulerA.y), vec3(0.0f, 1.0f, 0.0f));
+        //objRotation = rotate(objRotation, radians(eulerA.z), vec3(0.0f, 0.0f, 1.0f));
+
+        //mat4 objRotation2 = mat4(1.0);
+        //objRotation2 = rotate(objRotation2, radians(eulerA.x), vec3(1.0f, 0.0f, 0.0f));
+        //objRotation2 = rotate(objRotation2, radians(eulerA.y + 5.f), vec3(0.0f, 1.0f, 0.0f));
+        //objRotation2 = rotate(objRotation2, radians(eulerA.z), vec3(0.0f, 0.0f, 1.0f));
+
+        //mat4 fromPivot = translate(mat4(1.0), vec3(pivot));
+        //mat4 objTransform = fromPivot * objRotation2 * toPivot;
+        //
+        //vec3 result = eulerAngles(quat(objRotation * objRotation2));
+#pragma endregion retry
+
+        mBody->SetEulerAngles(updateRollWithEuler(GetEulerAngles(), mRollSpeed * mInput.mLeft ? 1 : -1));
+
+        float aileronMaxRot = 60;
+
+        lAileronEulerAngles.y = Lerp(lAileronEulerAngles.y, mInput.mLeft ? -aileronMaxRot : aileronMaxRot, 0.1);
+        rAileronEulerAngles.y = Lerp(rAileronEulerAngles.y, mInput.mLeft ? aileronMaxRot : -aileronMaxRot, 0.1);
+
+        float rudderMaxRot = 30;
+
+        rudderEulerAngles.z = Lerp(rudderEulerAngles.z, mInput.mLeft ? -rudderMaxRot : rudderMaxRot, 0.06);
     }
     else {
-        bodyEulerAngles.x = Lerp(bodyEulerAngles.x, 0, 0.02);
-        //mBody->SetEulerAngles(glAxis(bodyEulerAngles));
+        lAileronEulerAngles.y = Lerp(lAileronEulerAngles.y, 0, 0.03);
+        rAileronEulerAngles.y = Lerp(rAileronEulerAngles.y, 0, 0.03);
+        rudderEulerAngles.z = Lerp(rudderEulerAngles.z, 0, 0.03);
     }
     
+    mLeftAileron->SetEulerAngles(glAxis(lAileronEulerAngles));
+    mRightAileron->SetEulerAngles(glAxis(rAileronEulerAngles));
+
+    mLeftRudder->SetEulerAngles(glAxis(rudderEulerAngles));
+    mRightRudder->SetEulerAngles(glAxis(rudderEulerAngles));
+
 //    printf("pos: %s rot: %s \n", 
 //        toString(mBody->GetPosition()).c_str(), 
 //        toString(mBody->GetPosition()).c_str());
@@ -303,19 +351,19 @@ void Airplane::Input(AirplaneInput input) {
 }
 
 void Airplane::SetPosition(vec3 position) {
-    mHierarchy_1->SetPosition(position);
+    mBody->SetPosition(position);
 }
 
 void Airplane::SetEulerAngles(vec3 eulerAngles) {
-    mHierarchy_1->SetEulerAngles(eulerAngles);
+    mBody->SetEulerAngles(eulerAngles);
 }
 
 void Airplane::Move(vec3 movement) {
-    mHierarchy_1->SetPosition(mHierarchy_1->GetPosition() + movement);
+    mBody->SetPosition(mBody->GetPosition() + movement);
 }
 
 mat4 Airplane::GetModelMatrix() const{
-    return mHierarchy_1->GetModelMatrix();
+    return mBody->GetModelMatrix();
 }
 
 Airplane::Airplane() {
@@ -327,24 +375,16 @@ Airplane::Airplane() {
     int y = 1000;
     int z = 1000;
 
-    mHierarchy_1 = read_obj_file("models/empty.obj");
-    mHierarchy_1->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
-    mHierarchy_1->SetPivot(blenderAxis(vec3(-1.4, 0, 2.5)));
-
-    mHierarchy_2 = read_obj_file("models/empty.obj");
-    mHierarchy_2->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
-    mHierarchy_2->SetPivot(blenderAxis(vec3(-1.4, 0, 2.5)));
-
-    mPlane = read_obj_file("models/osprey/Body.obj");
-    mPlane->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
-    mPlane->SetPivot(blenderAxis(vec3(-1.4, 0, 2.5)));
+    mBody = read_obj_file("models/osprey/Body.obj");
+    mBody->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
+    mBody->SetPivot(blenderAxis(vec3(-1.4, 0, 2.5)));
 
     mElevator = read_obj_file("models/osprey/Elevator.obj");
-    mElevator->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
+    mElevator->LoadTexture2DSimpleBmp("models/red.bmp", x, y, z);
     mElevator->SetPivot(blenderAxis(vec3(-8.34f, 0.12f, 2.82f)));
 
     mLeftAileron = read_obj_file("models/osprey/Left_Aileron.obj");
-    mLeftAileron->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
+    mLeftAileron->LoadTexture2DSimpleBmp("models/red.bmp", x, y, z);
     mLeftAileron->SetPivot(blenderAxis(vec3(-0.29f, 4.5f, 3.84f)));
 
     mLeftEngine = read_obj_file("models/osprey/Left_Engine.obj");
@@ -360,11 +400,11 @@ Airplane::Airplane() {
     mLeftFlap->SetPivot(blenderAxis(vec3(-0.38f, 2.57f, 3.76f)));
 
     mLeftRudder = read_obj_file("models/osprey/Left_Rudder.obj");
-    mLeftRudder->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
+    mLeftRudder->LoadTexture2DSimpleBmp("models/red.bmp", x, y, z);
     mLeftRudder->SetPivot(blenderAxis(vec3(-8.16f, 3, 4.3f)));
 
     mRightAileron = read_obj_file("models/osprey/Right_Aileron.obj");
-    mRightAileron->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
+    mRightAileron->LoadTexture2DSimpleBmp("models/red.bmp", x, y, z);
     mRightAileron->SetPivot(blenderAxis(vec3(-0.29f, -4.5f, 3.84f)));
 
     mRightEngine = read_obj_file("models/osprey/Right_Engine.obj");
@@ -380,12 +420,10 @@ Airplane::Airplane() {
     mRightFlap->SetPivot(blenderAxis(vec3(-0.38f, -2.57f, 3.76f)));
 
     mRightRudder = read_obj_file("models/osprey/Right_Rudder.obj");
-    mRightRudder->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
+    mRightRudder->LoadTexture2DSimpleBmp("models/red.bmp", x, y, z);
     mRightRudder->SetPivot(blenderAxis(vec3(-8.16f, -3, 4.3f)));
 
-    mObjects.push_back(mHierarchy_1);
-    mObjects.push_back(mHierarchy_2);
-    mObjects.push_back(mPlane);
+    mObjects.push_back(mBody);
     mObjects.push_back(mElevator);
     mObjects.push_back(mLeftAileron);
     mObjects.push_back(mLeftEngine);
@@ -398,10 +436,7 @@ Airplane::Airplane() {
     mObjects.push_back(mRightFlap);
     mObjects.push_back(mRightRudder);
 
-    mHierarchy_1->AddDependency(mHierarchy_2);
-    mHierarchy_2->AddDependency(mPlane);
-
-    mPlane->AddDependencies(vector<Object*> { 
+    mBody->AddDependencies(vector<Object*> { 
         mLeftAileron, 
         mLeftFlap, 
         mRightAileron, 

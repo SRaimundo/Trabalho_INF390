@@ -21,11 +21,12 @@ GLint SCREEN_WIDTH = 800,SCREEN_HEIGHT = 800;
 int worldx=-5, worldy=175, worldz=0;
 // glm::vec3 camera(40.0f,0.0f,40.0f); // side view
 // glm::vec3 initCamera(40.0f,0.0f,40.0f); // side view
-glm::vec3 camera(40.0f,5.0f,1.0f); // rear view
-glm::vec3 initCamera(40.0f,5.0f,1.0f); // rear view
+glm::vec3 camera(-30.0f, 5.0f, 0.0f); // rear view
+glm::vec3 initCamera(-30.0f, 5.0f, 0.0f); // rear view
+
 float camerax=0.0,cameray=0.0,cameraz=5.0;
 
-bool dynamicCamera = false; 
+bool dynamicCamera = true; 
 
 AirplaneInput airplaneInput;
 

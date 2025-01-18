@@ -56,6 +56,20 @@ static vec3 glAxis(vec3 v) {
     return vec3(v.x, -v.z, v.y);
 }
 
+vec3 updateRollWithEuler(vec3 eulerAngles, float rollDelta) {
+    quat currentOrientation = quat(vec3(
+        radians(eulerAngles.x),  
+        radians(eulerAngles.y),  
+        radians(eulerAngles.z)   
+    ));
+
+    vec3 localRollAxis = currentOrientation * vec3(1.0f, 0.0f, 0.0f);
+    quat rollQuat = angleAxis(radians(rollDelta), normalize(localRollAxis));
+    quat updatedOrientation = normalize(rollQuat * currentOrientation);
+    vec3 updatedEulerAngles = glm::eulerAngles(updatedOrientation);
+    return degrees(updatedEulerAngles);
+}
+
 static vec3 Forward(float x, float y, float z) {
     float pitch = radians(x);
     float yaw = radians(y);
