@@ -184,8 +184,12 @@ int main(void){
     tree5->SetPosition(glAxis(vec3(-15, 40, 0)));
     tree5->SetScale(vec3(1.5, 1.5, 1.5));
 
+    Object* espera = read_obj_file("models/esfera_sm.obj");
+    espera->LoadTexture2DSimpleBmp("models/ceu.bmp", 0, 700, 490);
+    espera->SetScale(vec3(150.0f,150.0f,150.0f));
+
     my_scene.PushBackObjects(airplane.GetObjects());
-    my_scene.PushBackObjects(vector<Object*> {tree, tree2, tree3, tree4, tree5, alien, plane, steve, alien });
+    my_scene.PushBackObjects(vector<Object*> {tree, tree2, tree3, tree4, tree5, alien, plane, steve, alien,espera });
 
     // my_scene.SetWireframe(true);
     glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
