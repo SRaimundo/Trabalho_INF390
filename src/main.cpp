@@ -149,8 +149,43 @@ int main(void){
     Object* plane = read_obj_file("models/plane.obj");
     plane->LoadTexture2DSimpleBmp("models/uvmap.bmp", 0, 1000, 1000);
 
+    Object* steve = read_obj_file("models/steve/steve.obj");
+    steve->LoadTexture2DSimpleBmp("models/steve/steve.bmp", 0, 64, 64);
+    steve->SetPosition(glAxis(vec3(50, 50, 0)));
+    steve->SetScale(vec3(3, 3, 3));
+
+    Object* alien = read_obj_file("models/alien/alien.obj");
+    alien->LoadTexture2DSimpleBmp("models/alien/alien.bmp", 0, 1024, 1024);
+    alien->SetPosition(glAxis(vec3(15, 30, 0)));
+    alien->SetScale(vec3(10, 10, 10));
+
+    Object* tree = read_obj_file("models/tree/tree.obj");
+    tree->LoadTexture2DSimpleBmp("models/tree/tree.bmp", 0, 16, 16);
+    tree->SetPosition(glAxis(vec3(15, 30, 0)));
+    tree->SetScale(vec3(1.5, 1.5, 1.5));
+
+    Object* tree2 = read_obj_file("models/tree/tree.obj");
+    tree2->LoadTexture2DSimpleBmp("models/tree/tree.bmp", 0, 16, 16);
+    tree2->SetPosition(glAxis(vec3(50, 15, 0)));
+    tree2->SetScale(vec3(1.5, 1.5, 1.5));
+
+    Object* tree3 = read_obj_file("models/tree/tree.obj");
+    tree3->LoadTexture2DSimpleBmp("models/tree/tree.bmp", 0, 16, 16);
+    tree3->SetPosition(glAxis(vec3(20, -60, 0)));
+    tree3->SetScale(vec3(1.5, 1.5, 1.5));
+
+    Object* tree4 = read_obj_file("models/tree/tree.obj");
+    tree4->LoadTexture2DSimpleBmp("models/tree/tree.bmp", 0, 16, 16);
+    tree4->SetPosition(glAxis(vec3(-75, -20, 0)));
+    tree4->SetScale(vec3(1.5, 1.5, 1.5));
+
+    Object* tree5 = read_obj_file("models/tree/tree.obj");
+    tree5->LoadTexture2DSimpleBmp("models/tree/tree.bmp", 0, 16, 16);
+    tree5->SetPosition(glAxis(vec3(-15, 40, 0)));
+    tree5->SetScale(vec3(1.5, 1.5, 1.5));
+
     my_scene.PushBackObjects(airplane.GetObjects());
-    my_scene.PushBackObject(plane);
+    my_scene.PushBackObjects(vector<Object*> {tree, tree2, tree3, tree4, tree5, alien, plane, steve, alien });
 
     // my_scene.SetWireframe(true);
     glClearColor(1.0f, 1.0f, 1.0f, 0.0f);

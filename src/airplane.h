@@ -125,6 +125,15 @@ void Airplane::Land() {
 
     float landTimeScale = 3.0f;
 
+    vec3 bodyEulerAngles = blenderAxis(GetEulerAngles());
+    if (!Near(bodyEulerAngles.x, 0) || !Near(bodyEulerAngles.z, 0)) {
+        bodyEulerAngles.x = Lerp(bodyEulerAngles.x, 0, 0.01 * landTimeScale);
+        bodyEulerAngles.y = Lerp(bodyEulerAngles.y, 0, 0.01 * landTimeScale);
+
+        SetEulerAngles(glAxis(bodyEulerAngles));
+        return;
+    }
+
     vec3 leftEngineEulerAngles = blenderAxis(mLeftEngine->GetEulerAngles());
     vec3 rightEngineEulerAngles = blenderAxis(mRightEngine->GetEulerAngles());
     vec3 position = blenderAxis(mBody->GetPosition());
@@ -133,7 +142,6 @@ void Airplane::Land() {
     rightEngineEulerAngles.y = Lerp(rightEngineEulerAngles.y, 0, 0.005 * landTimeScale);
 
     float groundHeight = 0;
-
     // jet engines are upwards
     if (Near(leftEngineEulerAngles.y, 0, 0.5)) {
         leftEngineEulerAngles.y = 0;
@@ -318,7 +326,7 @@ void Airplane::Update() {
         //vec3 result = eulerAngles(quat(objRotation * objRotation2));
 #pragma endregion retry
 
-        mBody->SetEulerAngles(updateRollWithEuler(GetEulerAngles(), mRollSpeed * mInput.mLeft ? 1 : -1));
+        SetEulerAngles(UpdateRollWithEuler(GetEulerAngles(), mRollSpeed * mInput.mLeft ? -1 : 1));
 
         float aileronMaxRot = 60;
 
@@ -372,56 +380,56 @@ Airplane::Airplane() {
 
     // wip
     int x = 0;
-    int y = 1000;
-    int z = 1000;
+    int y = 2048;
+    int z = 2048;
 
-    mBody = read_obj_file("models/osprey/Body.obj");
-    mBody->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
-    mBody->SetPivot(blenderAxis(vec3(-1.4, 0, 2.5)));
+    mBody = read_obj_file("models/osprey-r/Body.obj");
+    mBody->LoadTexture2DSimpleBmp("models/osprey-r-tex.bmp", x, y, z);
+    mBody->SetPivot(blenderAxis(vec3(0, 0, 0)));
 
-    mElevator = read_obj_file("models/osprey/Elevator.obj");
-    mElevator->LoadTexture2DSimpleBmp("models/red.bmp", x, y, z);
-    mElevator->SetPivot(blenderAxis(vec3(-8.34f, 0.12f, 2.82f)));
+    mElevator = read_obj_file("models/osprey-r/Elevator.obj");
+    mElevator->LoadTexture2DSimpleBmp("models/osprey-r-tex.bmp", x, y, z);
+    mElevator->SetPivot(blenderAxis(vec3(-9.45f, 0.2f, 2.62f)));
 
-    mLeftAileron = read_obj_file("models/osprey/Left_Aileron.obj");
-    mLeftAileron->LoadTexture2DSimpleBmp("models/red.bmp", x, y, z);
-    mLeftAileron->SetPivot(blenderAxis(vec3(-0.29f, 4.5f, 3.84f)));
+    mLeftAileron = read_obj_file("models/osprey-r/Left_Aileron.obj");
+    mLeftAileron->LoadTexture2DSimpleBmp("models/osprey-r-tex.bmp", x, y, z);
+    mLeftAileron->SetPivot(blenderAxis(vec3(-0.2f, 5, 3.27f)));
 
-    mLeftEngine = read_obj_file("models/osprey/Left_Engine.obj");
-    mLeftEngine->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
-    mLeftEngine->SetPivot(blenderAxis(vec3(0.55f, 6.12f, 3.98f)));
+    mLeftEngine = read_obj_file("models/osprey-r/Left_Engine.obj");
+    mLeftEngine->LoadTexture2DSimpleBmp("models/osprey-r-tex.bmp", x, y, z);
+    mLeftEngine->SetPivot(blenderAxis(vec3(1.05f, 6.5f, 3.3f)));
 
-    mLeftFan = read_obj_file("models/osprey/Left_Fan.obj");
-    mLeftFan->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
-    mLeftFan->SetPivot(blenderAxis(vec3(0.09, 6.6, 5.7)));
+    mLeftFan = read_obj_file("models/osprey-r/Left_Fan.obj");
+    mLeftFan->LoadTexture2DSimpleBmp("models/osprey-r-tex.bmp", x, y, z);
+    mLeftFan->SetPivot(blenderAxis(vec3(0.64f, 7.043f, 5.37f)));
 
-    mLeftFlap = read_obj_file("models/osprey/Left_Flap.obj");
-    mLeftFlap->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
+    mLeftFlap = read_obj_file("models/osprey-r/Left_Flap.obj");
+    mLeftFlap->LoadTexture2DSimpleBmp("models/osprey-r-tex.bmp", x, y, z);
     mLeftFlap->SetPivot(blenderAxis(vec3(-0.38f, 2.57f, 3.76f)));
 
-    mLeftRudder = read_obj_file("models/osprey/Left_Rudder.obj");
-    mLeftRudder->LoadTexture2DSimpleBmp("models/red.bmp", x, y, z);
-    mLeftRudder->SetPivot(blenderAxis(vec3(-8.16f, 3, 4.3f)));
+    mLeftRudder = read_obj_file("models/osprey-r/Left_Rudder.obj");
+    mLeftRudder->LoadTexture2DSimpleBmp("models/osprey-r-tex.bmp", x, y, z);
+    mLeftRudder->SetPivot(blenderAxis(vec3(-9.6f, 2.51f, 3.21f)));
 
-    mRightAileron = read_obj_file("models/osprey/Right_Aileron.obj");
-    mRightAileron->LoadTexture2DSimpleBmp("models/red.bmp", x, y, z);
-    mRightAileron->SetPivot(blenderAxis(vec3(-0.29f, -4.5f, 3.84f)));
+    mRightAileron = read_obj_file("models/osprey-r/Right_Aileron.obj");
+    mRightAileron->LoadTexture2DSimpleBmp("models/osprey-r-tex.bmp", x, y, z);
+    mRightAileron->SetPivot(blenderAxis(vec3(-0.2f, -5, 3.27f)));
 
-    mRightEngine = read_obj_file("models/osprey/Right_Engine.obj");
-    mRightEngine->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
-    mRightEngine->SetPivot(blenderAxis(vec3(0.55f, -6.12f, 3.98f)));
+    mRightEngine = read_obj_file("models/osprey-r/Right_Engine.obj");
+    mRightEngine->LoadTexture2DSimpleBmp("models/osprey-r-tex.bmp", x, y, z);
+    mRightEngine->SetPivot(blenderAxis(vec3(vec3(1.05f, -6.5f, 3.3f))));
 
-    mRightFan = read_obj_file("models/osprey/Right_Fan.obj");
-    mRightFan->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
-    mRightFan->SetPivot(blenderAxis(vec3(0.09, -6.6, 5.7)));
+    mRightFan = read_obj_file("models/osprey-r/Right_Fan.obj");
+    mRightFan->LoadTexture2DSimpleBmp("models/osprey-r-tex.bmp", x, y, z);
+    mRightFan->SetPivot(blenderAxis(vec3(0.64f, -7.043f, 5.37f)));
 
-    mRightFlap = read_obj_file("models/osprey/Right_Flap.obj");
-    mRightFlap->LoadTexture2DSimpleBmp("models/uvmap.bmp", x, y, z);
+    mRightFlap = read_obj_file("models/osprey-r/Right_Flap.obj");
+    mRightFlap->LoadTexture2DSimpleBmp("models/osprey-r-tex.bmp", x, y, z);
     mRightFlap->SetPivot(blenderAxis(vec3(-0.38f, -2.57f, 3.76f)));
 
-    mRightRudder = read_obj_file("models/osprey/Right_Rudder.obj");
-    mRightRudder->LoadTexture2DSimpleBmp("models/red.bmp", x, y, z);
-    mRightRudder->SetPivot(blenderAxis(vec3(-8.16f, -3, 4.3f)));
+    mRightRudder = read_obj_file("models/osprey-r/Right_Rudder.obj");
+    mRightRudder->LoadTexture2DSimpleBmp("models/osprey-r-tex.bmp", x, y, z);
+    mRightRudder->SetPivot(blenderAxis(vec3(-9.6f, -2.51f, 3.21f)));
 
     mObjects.push_back(mBody);
     mObjects.push_back(mElevator);

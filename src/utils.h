@@ -56,7 +56,7 @@ static vec3 glAxis(vec3 v) {
     return vec3(v.x, -v.z, v.y);
 }
 
-vec3 updateRollWithEuler(vec3 eulerAngles, float rollDelta) {
+vec3 UpdateRollWithEuler(vec3 eulerAngles, float rollDelta) {
     quat currentOrientation = quat(vec3(
         radians(eulerAngles.x),  
         radians(eulerAngles.y),  

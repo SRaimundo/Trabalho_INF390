@@ -46,6 +46,11 @@ public:
     
     void SetWireframe(bool on_wireframe) { mIsWireframe = on_wireframe; };
     void LoadTexture2DSimpleBmp(const char *name,int header_size,int Width,int Height,int BGR=0);
+
+    Texture* GetTexture(int index) {
+        return &mTextures[index];
+    }
+
     void SetTextureCombinationEnabled(bool enabled) {mIsTextureCombinationEnabled = enabled;};
     bool GetTextureCombinationEnabled() const;
     
