@@ -147,7 +147,7 @@ int main(void){
     Airplane airplane;
 
     Object* plane = read_obj_file("models/plane.obj");
-    plane->LoadTexture2DSimpleBmp("models/uvmap.bmp", 0, 1000, 1000);
+    plane->LoadTexture2DSimpleBmp("models/pista.bmp", 0, 500, 500);
 
     Object* steve = read_obj_file("models/steve/steve.obj");
     steve->LoadTexture2DSimpleBmp("models/steve/steve.bmp", 0, 64, 64);
@@ -189,7 +189,7 @@ int main(void){
     espera->SetScale(vec3(150.0f,150.0f,150.0f));
 
     my_scene.PushBackObjects(airplane.GetObjects());
-    my_scene.PushBackObjects(vector<Object*> {tree, tree2, tree3, tree4, tree5, alien, plane, steve, alien,espera });
+    my_scene.PushBackObjects(vector<Object*> {tree, tree2, tree3, tree4, tree5, alien, plane, steve, alien, espera});
 
     // my_scene.SetWireframe(true);
     glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
